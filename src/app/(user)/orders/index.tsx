@@ -9,10 +9,9 @@ const OrderScreen = () => {
   return (
     <FlatList    
         data={orders}
-        renderItem={({item}) => ( <OrderListItem order={item} />  )}   
+        renderItem={({item}) => ( <OrderListItem order={item} />  )}
         contentContainerStyle={{gap: 10, padding: 10}} 
-    />   
-    
+    />       
   )
 }
 

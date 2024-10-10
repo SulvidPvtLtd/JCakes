@@ -39,8 +39,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="orders" //Group of screen `orders` folder
-        
+        name="orders"      
         options={{
           title: 'Orders',
           headerShown: false,
