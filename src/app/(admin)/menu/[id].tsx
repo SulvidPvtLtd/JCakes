@@ -37,7 +37,6 @@ const ProductDetailsScreen = () => {
     }
     addItem(product, selectedSize);
     router.push('/cart');
-
     // console.warn('Added to Cart');
   }
 
@@ -59,7 +58,7 @@ const ProductDetailsScreen = () => {
                       <FontAwesome
                         name="pencil"
                         size={25}
-                        color={Colors.light.tint}
+                        color={Colors.light.adminBtn}
                         style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                       />
                   )}

@@ -23,7 +23,7 @@ export default function MenuStack() {
                       <FontAwesome
                         name="plus-square-o"
                         size={25}
-                        color={Colors.light.tint}
+                        color={Colors.light.adminBtn}
                         style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                       />
                   )}

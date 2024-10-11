@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 // consume from the exported CartProvider's CartContext.
 import { useCart } from '../providers/CartProvider';
 import CartListItem from '../components/CartListItem';
-import Button from '../components/Button';
+import ButtonUser from '../components/ButtonUser';
 
 
 const CartScreen = () => {
@@ -25,7 +25,7 @@ const CartScreen = () => {
         Total: ${total.toFixed(2)}
       </Text>
 
-      <Button text="Checkout" />
+      <ButtonUser text="Checkout" />
 
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
     </View>

@@ -7,7 +7,7 @@
     existing ones based on the presence of an ID.
 */
 import { Alert, View, Text, TextInput, StyleSheet, Image } from 'react-native';
-import Button from '@/src/components/Button';
+import ButtonAdmin from '@/src/components/ButtonAdmin';
 import React, { useState, useCallback } from 'react';
 import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
@@ -104,10 +104,9 @@ const CreateProductScreen: React.FC = () => {
         }
 
         console.log('Updating Product: ', name);
-
         // saving to a database
-
         resetFields()
+
     }
 
     // Handle create action
@@ -166,7 +165,7 @@ const CreateProductScreen: React.FC = () => {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <Button  onPress={onSubmit} text={isUpdating ? "Update" : "" } />
+            <ButtonAdmin  onPress={onSubmit} text={isUpdating ? "Update" : "" } />
             {isUpdating && 
                 <Text onPress={confirmDelete} style={styles.textButton}>
                     Delete

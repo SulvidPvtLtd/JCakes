@@ -5,7 +5,7 @@ import products from '@/assets/data/products' ;
 import { defaultPizzaImage } from '@/src/components/ProductListItem'; //link to the default images.
 import { useState } from 'react'; // it should be used in the top body of the component. 
 import Colors from '@/src/constants/Colors';
-import Button from '@/src/components/Button';
+import ButtonUser from '@/src/components/ButtonUser';
 import { useCart } from '@/src/providers/CartProvider';
 import { PizzaSize } from '@/src/types';
 
@@ -60,7 +60,7 @@ const ProductDetailsScreen = () => {
 
       <Text style={styles.price}>${product?.price}</Text>
 
-        <Button onPress={addToCart} text='Add to Cart' />
+        <ButtonUser  onPress={addToCart} text='Add to Cart' />
 
     </View>
   )

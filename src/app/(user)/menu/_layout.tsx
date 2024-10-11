@@ -13,7 +13,7 @@ export default function MenuStack() {
               <Feather
                 name="shopping-cart"
                 size={30}
-                color={Colors.light.tint}
+                color={Colors.dark.userBtn}
                 style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
               />
             )}
