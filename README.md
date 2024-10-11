@@ -2,45 +2,49 @@
 
 This is my Frontend Project structure:
 
-    project-root
+    project-root/
+    ├── assets/                     # Contains image, font, and other static files
+    │   ├── data/                   # Static data used in the app
+    │   └── fonts/                  # Custom fonts used in the app
     │
-    ├── src                         # Main source directory of the project
-    │   ├── app                     # Application folder containing navigation and screen components
-    │   │   ├── (admin)             # Admin-specific routes and screens
-    │   │   │   ├── _layout.tsx     # Layout for admin section, defines tab navigation and screen options
-    │   │   │   ├── index.tsx       # Redirects admin to the 'menu' section
-    │   │   │   ├── two.tsx         # Screen for displaying "Orders" in the admin section
-    │   │   │   └── menu            # Folder for menu management in the admin section
-    │   │   │       ├── index.tsx   # Displays the list of menus
-    │   │   │       ├── create.tsx  # Form for creating a new menu
-    │   │   │       └── [id].tsx    # Displays detailed information about a specific menu by its ID
-    │   │   ├── (user)              # User-specific routes and screens
-    │   │   │   ├── _layout.tsx     # Layout for user section, defines navigation for user-related screens
-    │   │   │   ├── index.tsx       # Main entry point for user routes, potentially showing a dashboard
-    │   │   │   ├── orders          # Folder containing user order-related screens
-    │   │   │   │   ├── _layout.tsx # Layout for orders section, defining navigation for orders
-    │   │   │   │   ├── index.tsx   # Displays the list of orders for the user
-    │   │   │   │   └── [id].tsx    # Displays order details for a specific order by its ID
-    │   │   ├── _layout.tsx         # Global layout for the entire app, defines root navigation stack (auth, admin, user)
-    │   │   ├── index.tsx           # Entry point of the app, allows navigation between admin, user, and sign-in screens
-    │   │   └── cart.tsx            # Modal screen for the shopping cart
+    ├── src/                        # Main source folder for the application
+    │   ├── app/                    # App screens and navigation structure
+    │   │   ├── (admin)/            # Admin section screens and layout
+    │   │   │   ├── _layout.tsx     # Admin tab layout, defines tab navigation for admin views
+    │   │   │   ├── menu/           # Admin menu-related screens
+    │   │   │   │   ├── create.tsx  # Screen for creating a new menu item
+    │   │   │   │   ├── [id].tsx    # Screen for viewing specific menu items based on ID
+    │   │   │   │   └── index.tsx   # Default screen displaying the admin menu items
+    │   │   │   ├── two.tsx         # Admin "Orders" screen
+    │   │   │   └── index.tsx       # Default screen that redirects to /menu
+    │   │   ├── (user)/             # User section screens and layout
+    │   │   │   ├── _layout.tsx     # User tab layout, defines tab navigation for user views
+    │   │   │   ├── orders/         # User orders-related screens
+    │   │   │   │   ├── _layout.tsx # Layout for orders section
+    │   │   │   │   ├── [id].tsx    # Screen to view a specific order based on ID
+    │   │   │   │   └── index.tsx   # Default screen for viewing user orders
+    │   │   ├── _layout.tsx         # Main layout for routing between user and admin sections
+    │   │   └── index.tsx           # Landing screen with links to User, Admin, and Sign In
+    │   │
+    │   ├── components/             # Reusable UI components
+    │   │   ├── Button.tsx          # Custom button component used in the app
+    │   │   ├── EditScreenInfo.tsx  # Example component for editing screen information
+    │   │   ├── Themed.tsx          # Themed wrapper components for light/dark mode
+    │   │   └── useColorScheme.tsx  # Hook to determine light or dark mode
+    │   │
+    │   ├── constants/              # App-wide constant definitions
+    │   │   └── Colors.ts           # Color constants for theming
+    │   │
+    │   ├── providers/              # Context providers and global state management
+    │   │   └── CartProvider.tsx    # Provides shopping cart context to the app
     │
-    ├── components                  # Reusable UI components and utilities
-    │   ├── Button.tsx              # Button component used across the app with custom styles
-    │   ├── Themed.tsx              # Themed components (View, Text, etc.) supporting light and dark modes
-    │   └── useColorScheme.ts       # Custom hook to detect and apply the user's preferred color scheme
-    │
-    ├── providers                   # Context providers to manage global state
-    │   └── CartProvider.tsx        # Provides cart-related state and functions across the app
-    │
-    ├── assets                      # Folder for static assets like images, fonts, and icons
-    │   └── fonts                   # Custom fonts used in the project
-    │       └── SpaceMono-Regular.ttf # SpaceMono font used in the project
-    │
-    ├── tsconfig.json               # TypeScript configuration file with custom path aliases and compiler options
-    ├── package.json                # Project dependencies and scripts
-    └── node_modules                # Installed npm packages
+    ├── tsconfig.json               # TypeScript configuration file
+    └── package.json                # Dependencies and project metadata
 
+src/app/: Contains the main app's screen components, organized into admin and user sections with their own layouts and screens.
+src/components/: Reusable components like buttons and theme-related helpers.
+src/constants/: Stores configuration files such as color schemes for consistent app theming.
+src/providers/: Manages the app's global state through context, like the CartProvider.
 
 # Topics Covered in this project:
 
