@@ -1,3 +1,10 @@
+/*
+  This file defines the TabTwoScreen component, 
+  which displays a simple "Orders" title and includes a 
+  separator and an EditScreenInfo component. 
+  It serves as a placeholder or template for future order-related 
+  functionalities.
+*/
 import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../../components/EditScreenInfo';

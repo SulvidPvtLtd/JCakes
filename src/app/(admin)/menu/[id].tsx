@@ -1,3 +1,10 @@
+/*
+  This file provides a detailed view of a specific 
+  product identified by its ID. It displays the 
+  product's image, name, and price. 
+  It also allows users to navigate to the creation 
+  screen to edit the product and add it to their cart
+*/
 import { View, Text, Image,StyleSheet, Pressable } from 'react-native';
 import React from 'react';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -35,14 +42,17 @@ const ProductDetailsScreen = () => {
   }
 
   if(!product){
-      <Text>Product not found</Text>
+      return(
+        <Text>Product not found</Text>
+      )
   }
 
   return (
     <View style={styles.container}>
 
         <Stack.Screen options={{
-            title:'Menu',  headerRight:() => (
+            title:'Menu',  
+            headerRight:() => (
               <Link href={`/(admin)/menu/create?id=${id}`} asChild>
                 <Pressable>
                   {({ pressed }) => (

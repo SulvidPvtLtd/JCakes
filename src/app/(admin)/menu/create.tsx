@@ -1,3 +1,11 @@
+/*
+    This component allows users to create or update a
+    product. It includes form fields for entering the
+    product name and price, a button for selecting 
+    an image, and logic for validation and submission. 
+    It handles both creating new products and updating 
+    existing ones based on the presence of an ID.
+*/
 import { Alert, View, Text, TextInput, StyleSheet, Image } from 'react-native';
 import Button from '@/src/components/Button';
 import React, { useState, useCallback } from 'react';
@@ -14,7 +22,7 @@ const CreateProductScreen: React.FC = () => {
     const [image, setImage] = useState<string | null>(null);
 
     const {id} = useLocalSearchParams();
-    const isUpdating = !!id //!!id ensures that isUpdating is explicitly a boolean
+    const isUpdating = !!id; //!!id ensures that isUpdating is explicitly a boolean
 
     
     // Regular expression patterns
@@ -135,7 +143,7 @@ const CreateProductScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{title: isUpdating ? 'Update Product':'Create Product'}} />
+            <Stack.Screen options={{title: isUpdating ? "Update Product":"Create Product"}} />
             <Image source={{uri: image || defaultPizzaImage}} style={styles.image} />
             <Text onPress={pickImage } style={styles.textButton}>Select image</Text>
 
@@ -158,7 +166,7 @@ const CreateProductScreen: React.FC = () => {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <Button  onPress={onSubmit} text={isUpdating ? 'Update' : 'Create' } />
+            <Button  onPress={onSubmit} text={isUpdating ? "Update" : "" } />
             {isUpdating && 
                 <Text onPress={confirmDelete} style={styles.textButton}>
                     Delete
