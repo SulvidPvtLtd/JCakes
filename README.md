@@ -1,3 +1,47 @@
+# Project Structure
+
+This is my Frontend Project structure:
+
+    project-root
+    │
+    ├── src                         # Main source directory of the project
+    │   ├── app                     # Application folder containing navigation and screen components
+    │   │   ├── (admin)             # Admin-specific routes and screens
+    │   │   │   ├── _layout.tsx     # Layout for admin section, defines tab navigation and screen options
+    │   │   │   ├── index.tsx       # Redirects admin to the 'menu' section
+    │   │   │   ├── two.tsx         # Screen for displaying "Orders" in the admin section
+    │   │   │   └── menu            # Folder for menu management in the admin section
+    │   │   │       ├── index.tsx   # Displays the list of menus
+    │   │   │       ├── create.tsx  # Form for creating a new menu
+    │   │   │       └── [id].tsx    # Displays detailed information about a specific menu by its ID
+    │   │   ├── (user)              # User-specific routes and screens
+    │   │   │   ├── _layout.tsx     # Layout for user section, defines navigation for user-related screens
+    │   │   │   ├── index.tsx       # Main entry point for user routes, potentially showing a dashboard
+    │   │   │   ├── orders          # Folder containing user order-related screens
+    │   │   │   │   ├── _layout.tsx # Layout for orders section, defining navigation for orders
+    │   │   │   │   ├── index.tsx   # Displays the list of orders for the user
+    │   │   │   │   └── [id].tsx    # Displays order details for a specific order by its ID
+    │   │   ├── _layout.tsx         # Global layout for the entire app, defines root navigation stack (auth, admin, user)
+    │   │   ├── index.tsx           # Entry point of the app, allows navigation between admin, user, and sign-in screens
+    │   │   └── cart.tsx            # Modal screen for the shopping cart
+    │
+    ├── components                  # Reusable UI components and utilities
+    │   ├── Button.tsx              # Button component used across the app with custom styles
+    │   ├── Themed.tsx              # Themed components (View, Text, etc.) supporting light and dark modes
+    │   └── useColorScheme.ts       # Custom hook to detect and apply the user's preferred color scheme
+    │
+    ├── providers                   # Context providers to manage global state
+    │   └── CartProvider.tsx        # Provides cart-related state and functions across the app
+    │
+    ├── assets                      # Folder for static assets like images, fonts, and icons
+    │   └── fonts                   # Custom fonts used in the project
+    │       └── SpaceMono-Regular.ttf # SpaceMono font used in the project
+    │
+    ├── tsconfig.json               # TypeScript configuration file with custom path aliases and compiler options
+    ├── package.json                # Project dependencies and scripts
+    └── node_modules                # Installed npm packages
+
+
 # Topics Covered in this project:
 
     1	 This is a full-stack food ordering app built using React Native and Supabase.
