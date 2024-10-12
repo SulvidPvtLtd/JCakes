@@ -142,7 +142,7 @@ const CreateProductScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{title: isUpdating ? "Update Product":"Create Product"}} />
+            <Stack.Screen options={{title: isUpdating ? "Update Product":"Create Product", headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20}}} />
             <Image source={{uri: image || defaultPizzaImage}} style={styles.image} />
             <Text onPress={pickImage } style={styles.textButton}>Select image</Text>
 

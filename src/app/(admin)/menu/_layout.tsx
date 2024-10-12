@@ -16,6 +16,7 @@ export default function MenuStack() {
         <Stack.Screen 
           name="index" 
           options={{
+            headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20},
             title:'Menu',  headerRight:() => (
               <Link href="/(admin)/menu/create" asChild>
                 <Pressable>

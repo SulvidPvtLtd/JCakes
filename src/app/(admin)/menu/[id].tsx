@@ -3,7 +3,8 @@
   product identified by its ID. It displays the 
   product's image, name, and price. 
   It also allows users to navigate to the creation 
-  screen to edit the product and add it to their cart
+  screen to edit the product and add it to their cart.
+  This will display products available to all customers.
 */
 import { View, Text, Image,StyleSheet, Pressable } from 'react-native';
 import React from 'react';
@@ -51,6 +52,7 @@ const ProductDetailsScreen = () => {
 
         <Stack.Screen options={{
             title:'Menu',  
+            headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20},
             headerRight:() => (
               <Link href={`/(admin)/menu/create?id=${id}`} asChild>
                 <Pressable>
