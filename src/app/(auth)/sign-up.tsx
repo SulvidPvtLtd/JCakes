@@ -2,7 +2,7 @@ import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import React, { useState } from 'react';
 import Button from '../../components/Button';
 import Colors from '../../constants/Colors';
-import { Link, Stack } from 'expo-router';
+import { Link, Stack, useRouter } from 'expo-router';
 import {supabase} from '@/src/lib/supabase'
 
 
@@ -10,10 +10,34 @@ const SignUpScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();  // Use router for navigation
+
+  async function checkAccountExists() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: "placeholder_password", // Dummy password to check existence
+    });
+
+    // If the error is about invalid login credentials, the account exists
+    if (error && error.message === 'Invalid login credentials') {
+      return true; // Account exists
+    }
+    return false; // Account doesn't exist
+  }
 
   async function signUpWithEmail() {
     // console.warn("Sign Up");
-    setLoading(true);
+    const accountExists = await checkAccountExists();
+
+    if (accountExists) {
+      Alert.alert("Account already exists. Redirecting to sign-in...");
+      router.push('/sign-in');  // Navigate to sign-in
+      setLoading(false);
+      return;
+    }
+
+    // setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
