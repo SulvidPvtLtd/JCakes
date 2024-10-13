@@ -34,14 +34,14 @@ const OrderDetailScreen = () => {
                 key={status}
                 onPress={() => console.warn('Update status')}
                 style={{
-                  borderColor: Colors.light.tint,
+                  borderColor: Colors.light.adminBtn,
                   borderWidth: 1,
                   padding: 10,
                   borderRadius: 5,
                   marginVertical: 10,
                   backgroundColor:
                     order.status === status
-                      ? Colors.light.tint
+                      ? Colors.light.adminBtn
                       : 'transparent',
                 }}
               >

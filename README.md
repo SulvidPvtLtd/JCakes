@@ -711,4 +711,4 @@ The admin side, will have a lot of common screens like user side, such as:
 
 However, it will have some additional screens as well like create Product, etc.
 
-//3:21:04
+//3:25:04
