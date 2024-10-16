@@ -711,6 +711,6 @@ The admin side, will have a lot of common screens like user side, such as:
 
 However, it will have some additional screens as well like create Product, etc.
 
-//3:55:48
+
 
 // Remember to enable back the email validation under supadabse/providers/email when you are done testing the app.
