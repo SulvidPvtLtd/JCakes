@@ -711,15 +711,56 @@ The admin side, will have a lot of common screens like user side, such as:
 
 However, it will have some additional screens as well like create Product, etc.
 
-
-
 // Remember to enable back the email validation under supadabse/providers/email when you are done testing the app.
 
-
 # Designing the Table
-- Setup the Products database table, 
+
+- Setup the Products database table,
 - and will query and mutate the data
 
 Start by creating the products table in the Supabse Dashboard
 
+Based on our types.ts - our products have
+export type Product = {
+id: number;
+image: string | null;
+name: string;
+price: number;
+};
+On supabase,
 
+1. Database>>Tables>>Create a new table underpublic
+2. Table name: `products`
+3. Description: `Product details`
+4. Enable Row Level Security
+5. Columns
+   - id >> int8 >> primary key
+   - created_at >> timestamptz >> now()
+   - name >> text >> isNullable (remove checkmark)
+   - image >> text >> isNullable (leave checkmark to make it assume a null value)
+   - price >> float4 >> isNullable (remove checkmark)
+6. Save
+
+Now Go back to Table Editor >> products >> Insert >> Rows
+
+In the (user)/menu/index.tsx fetch information from the supabase table you just created above making use of the useEffect() hook.
+
+    useEffect( ()=> {
+    const fetchProducts = async () => {
+        const {data, error} = await supabase.from('products').select('*');
+        //console.log(data, error);
+        }
+        fetchProducts();
+    },[] );
+
+This query should have failed initially, because the data is protected by Row Level Security policies on the PostgreSQL Database layer. By default, nobody has access to the table.
+
+We have to specify rules to give specific users granular access to the data.
+
+On the product table name's breadcrump, select View policies.
+Select Create policy.
+
+To manage these queries that are policy controlled, we will use
+React Query liabrary: [**React Query**](https://tanstack.com/query/latest) is a powerful state management and data fetching library that helps us query remote data. Besides helping us query data, manage the loading and error states, it also provides a caching mechanism for our local data. That will help us keep all the data in sync when things change in the application.
+
+4:25:59

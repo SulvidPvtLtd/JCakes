@@ -10,6 +10,7 @@ const SignUpScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();  // Use router for navigation
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   async function checkAccountExists() {
     setLoading(true);
@@ -56,6 +57,10 @@ const SignUpScreen = () => {
     setLoading(false);
   }
 
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Sign up' }} />
@@ -64,7 +69,7 @@ const SignUpScreen = () => {
       <TextInput
         value={email}
         onChangeText={setEmail}
-        placeholder="jonh.doe@gmail.com"
+        placeholder="Email address"
         style={styles.input}
       />
 
@@ -72,9 +77,9 @@ const SignUpScreen = () => {
       <TextInput
         value={password}
         onChangeText={setPassword}
-        placeholder=""
+        placeholder="Password"
         style={styles.input}
-        secureTextEntry
+        secureTextEntry={!isPasswordVisible}
       />
 
       <Button onPress={signUpWithEmail} disabled={loading} text={loading ? "Creating account..." : "Create account"} />

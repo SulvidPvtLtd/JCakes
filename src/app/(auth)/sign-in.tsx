@@ -36,7 +36,7 @@ const SignInScreen = () => {
       <TextInput
         value={email}
         onChangeText={setEmail}
-        placeholder="john.doe@gmail.com"
+        placeholder="Email address"
         style={styles.emailInput}
       />
 
