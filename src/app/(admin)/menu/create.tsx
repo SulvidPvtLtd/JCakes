@@ -133,7 +133,7 @@ const CreateProductScreen: React.FC = () => {
           quality: 1,
         });
     
-        console.log(result);
+        // console.log(result);
     
         if (!result.canceled) {
           setImage(result.assets[0].uri);
@@ -165,7 +165,7 @@ const CreateProductScreen: React.FC = () => {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <ButtonAdmin  onPress={onSubmit} text={isUpdating ? "Update" : "" } />
+            <ButtonAdmin  onPress={onSubmit} text={isUpdating ? "Updating" : "Create" } />
             {isUpdating && 
                 <Text onPress={confirmDelete} style={styles.textButton}>
                     Delete

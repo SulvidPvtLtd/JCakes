@@ -13,21 +13,22 @@ const index = () => {
   // console.log(session);
 
   if(loading){
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator />;
   }
 
   
-  if(!session){
-    return <Redirect href={'/(auth)/sign-in'} />
+  if(!session){                           // if user is not signed in.
+    return <Redirect href={'/sign-in'} />
   }
 
-  if(!isAdmin){
+  if(!isAdmin){                          // if user is not an Admin
     return <Redirect href={'/(user)'} />
   }
-
-  return (
+ 
+  return (                               // if use is an Admin
     <View style={{ flex: 1, justifyContent: 'center', padding: 10 }}>
       
+      {/* The administrator should have a posibility to choose if he wants to look at the app as a USER or as an ADMIN*/}
       <Link href={'/(user)'} asChild>
         <ButtonUser text="User" />
       </Link>

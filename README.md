@@ -714,3 +714,12 @@ However, it will have some additional screens as well like create Product, etc.
 
 
 // Remember to enable back the email validation under supadabse/providers/email when you are done testing the app.
+
+
+# Designing the Table
+- Setup the Products database table, 
+- and will query and mutate the data
+
+Start by creating the products table in the Supabse Dashboard
+
+

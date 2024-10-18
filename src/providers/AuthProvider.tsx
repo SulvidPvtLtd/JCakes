@@ -33,19 +33,22 @@ export default function AuthProvider({ children }: PropsWithChildren) {
             // console.log(data);
             setSession(session);
             
-            if (session) {
-              // fetch profile
+            
+            if (session) {                // This checks if the session object exists, meaning the user is logged in.
+              
+              // fetch profile by making use of JavaScript Client.
               const { data } = await supabase
                 .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              setProfile(data || null);
+                .select('*')               // select all columns
+                .eq('id', session.user.id) // checking if the id column matches the session.user.id (the current logged-in user's ID).
+                .single();                 // retrieve only one row (since id is expected to be unique)
+              setProfile(data || null);    // If the query returned a result (data), it sets the profile state with that data, otherwise set it with null
             }
 
             setLoading(false);
 
-        };
+        }; 
+
         fetchSession();
         supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
@@ -53,7 +56,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
     }, []);
 
-   console.log(profile); 
+   // console.log(profile); 
 
   return (
     <AuthContext.Provider value={{session, loading, profile, isAdmin:profile?.group == 'ADMIN'}}>
