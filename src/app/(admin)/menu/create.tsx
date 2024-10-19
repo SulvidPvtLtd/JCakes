@@ -13,6 +13,7 @@ import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useInsertProduct } from '@/src/api/products';
 
 const CreateProductScreen: React.FC = () => {
     
@@ -24,7 +25,8 @@ const CreateProductScreen: React.FC = () => {
     const {id} = useLocalSearchParams();
     const isUpdating = !!id; //!!id ensures that isUpdating is explicitly a boolean
 
-    
+    const { mutate: insertProduct } = useInsertProduct();
+
     // Regular expression patterns
     const namePattern = /^[a-zA-Z\s]+$/;  // Allows only letters and spaces
     const pricePattern = /^\d+(\.\d{1,2})?$/; // Allows numbers with up to two decimal places
@@ -103,8 +105,9 @@ const CreateProductScreen: React.FC = () => {
             return
         }
 
-        console.log('Updating Product: ', name);
+        console.log('Creating Product: ', name);
         // saving to a database
+        insertProduct({name,image,price:parseFloat(price)})
         resetFields()
 
     }
