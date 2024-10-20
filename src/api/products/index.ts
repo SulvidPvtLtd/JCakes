@@ -1,6 +1,7 @@
 import { supabase } from "@/src/lib/supabase";
 import { Product } from "@/src/types";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
 /* useProductList: This hook is for fetching a list of all products from the database.
    The queryKey is ['products'], which identifies that this query is for fetching the list of products. This key helps with caching and refetching logic.
@@ -45,6 +46,8 @@ export const useProduct = (id: number) => {
 // Hook for creating a product
 export const useInsertProduct = () => {
 
+  const QueryClient = useQueryClient();
+
   return useMutation({
     async mutationFn(data: any){
       //receive `data` and do something with it.
@@ -59,12 +62,24 @@ export const useInsertProduct = () => {
       }
       return newProduct;
     },
+
+    // This code make the new product rnder immidiately on the page instaed of waiting for the app to reload.
+    async onSuccess(){
+      await QueryClient.invalidateQueries({queryKey: ['products']});
+    },
+    // onError(error){
+    //   console.log(error);
+    // }   
+
   });
 };
 
 
 // Hook for updating an existing product
 export const useUpdateProduct = () => {
+  const queryClient = useQueryClient(); // Get the query client for invalidation
+  const router = useRouter(); // Router for navigating back
+
   return useMutation({
     async mutationFn(data: { id: number; name: string; image: string | null; price: number }) {
       const { data: updatedProduct, error } = await supabase
@@ -81,6 +96,16 @@ export const useUpdateProduct = () => {
         throw new Error(error.message);
       }
       return updatedProduct;
+    },
+    
+    // On success, invalidate the product list and navigate back to the previous page
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate product list query to refetch the updated data
+      router.back(); // Navigate back after the update
+    },
+    
+    onError: (error) => {
+      console.error("Error updating product:", error.message); // Handle any errors that occur during update
     },
   });
 };

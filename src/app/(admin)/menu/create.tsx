@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useInsertProduct, useUpdateProduct } from '@/src/api/products';
 
 const CreateProductScreen: React.FC = () => {
@@ -21,6 +21,7 @@ const CreateProductScreen: React.FC = () => {
 
   const { mutate: insertProduct } = useInsertProduct();
   const { mutate: updateProduct } = useUpdateProduct();
+  const router = useRouter();
 
   const resetFields = useCallback(() => {
     setName('');
@@ -63,7 +64,7 @@ const CreateProductScreen: React.FC = () => {
             resetFields();
             setButtonText('Create');
             Alert.alert('Success', 'Product updated successfully!', [
-              { text: 'OK', onPress: () => console.log('OK Pressed') }, // You can add navigation logic here
+              { text: 'OK', onPress: () => {router.back()} }, // You can add navigation logic here
             ]);
           },
           onError: (err: any) => setError(err.message),
