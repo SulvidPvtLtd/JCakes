@@ -1,11 +1,3 @@
-/*
-    This component allows users to create or update a
-    product. It includes form fields for entering the
-    product name and price, a button for selecting 
-    an image, and logic for validation and submission. 
-    It handles both creating new products and updating 
-    existing ones based on the presence of an ID.
-*/
 import { Alert, View, Text, TextInput, StyleSheet, Image } from 'react-native';
 import ButtonAdmin from '@/src/components/ButtonAdmin';
 import React, { useState, useCallback } from 'react';
@@ -13,204 +5,200 @@ import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useInsertProduct } from '@/src/api/products';
+import { useInsertProduct, useUpdateProduct } from '@/src/api/products';
 
 const CreateProductScreen: React.FC = () => {
-    
-    const [name, setName] = useState<string>('');
-    const [price, setPrice] = useState<string>('');
-    const [error, setError] = useState<string>('');
-    const [image, setImage] = useState<string | null>(null);
+  const [name, setName] = useState<string>('');
+  const [price, setPrice] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [buttonText, setButtonText] = useState('Submit');
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const {id} = useLocalSearchParams();
-    const isUpdating = !!id; //!!id ensures that isUpdating is explicitly a boolean
+  const { id } = useLocalSearchParams();
+  const isUpdating = !!id;
 
-    const { mutate: insertProduct } = useInsertProduct();
+  const { mutate: insertProduct } = useInsertProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
 
-    // Regular expression patterns
-    const namePattern = /^[a-zA-Z\s]+$/;  // Allows only letters and spaces
-    const pricePattern = /^\d+(\.\d{1,2})?$/; // Allows numbers with up to two decimal places
+  const resetFields = useCallback(() => {
+    setName('');
+    setPrice('');
+    setImage(null);
+  }, []);
 
-    // Memoized function to reset input fields
-    const resetFields = useCallback(() => {
-        setName('');
-        setPrice('');
-    }, []);
-
-    // Input sanitization
-    const sanitizeInput = (input: string): string => {
-        return input.replace(/[<>]/g, '');  // Remove characters like < and >
-    };
-
-    // Input validation logic
-    const validateInput = useCallback((): boolean => {
-        
-        const sanitizedName = sanitizeInput(name.trim());
-        const sanitizedPrice = sanitizeInput(price.trim());
-
-        if (!sanitizedName) {
-            setError('Name is required.');
-            return false;
-        }
-
-        if (!namePattern.test(sanitizedName)) {
-            setError('Name can only contain letters and spaces.');
-            return false;
-        }
-
-        if (!sanitizedPrice) {
-            setError('Price is required.');
-            return false;
-        }
-
-        if (!pricePattern.test(sanitizedPrice)) {
-            setError('Price must be a valid number with up to two decimal places.');
-            return false;
-        }
-
-        setError(''); // Clear errors if validation passes
-        return true;
-    }, [name, price]);
-
-    const onDelete = () => {
-        console.warn('Delete !!!!!!');
+  const validateInput = useCallback((): boolean => {
+    if (!name.trim()) {
+      setError('Name is required.');
+      return false;
     }
 
-    const confirmDelete = ()=>{
-        Alert.alert("Confirm","Are you sure you want to delete this product ?", [
-            {
-                text:"Cancel"
-            },
-            {
-                text: "Delete",
-                style:"destructive",
-                onPress: onDelete,
-            }
-         ])
+    if (!price.trim()) {
+      setError('Price is required.');
+      return false;
     }
 
-    const onSubmit = ()=> {
-
-        if(isUpdating){
-            onUpdateCreate();
-        }
-        else{
-            onCreate()
-        }
+    if (isNaN(parseFloat(price))) {
+      setError('Price must be a valid number.');
+      return false;
     }
 
-    // Handle submition action
-    const onUpdateCreate = () => {
-        if (!validateInput()) {
-            return
+    setError('');
+    return true;
+  }, [name, price]);
+
+  const onUpdate = async () => {
+    if (!validateInput()) return;
+
+    setLoading(true);
+    setButtonText('Updating...');
+
+    try {
+      updateProduct(
+        { id: Number(id), name, price: parseFloat(price), image },
+        {
+          onSuccess: () => {
+            setSuccessMessage('Product updated successfully!');
+            resetFields();
+            setButtonText('Create');
+            Alert.alert('Success', 'Product updated successfully!', [
+              { text: 'OK', onPress: () => console.log('OK Pressed') }, // You can add navigation logic here
+            ]);
+          },
+          onError: (err: any) => setError(err.message),
         }
-
-        console.log('Creating Product: ', name);
-        // saving to a database
-        insertProduct({name,image,price:parseFloat(price)})
-        resetFields()
-
+      );
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Handle create action
-    const onCreate = () => {
-        if (!validateInput()) {
-            return
+  const onCreate = async () => {
+    if (!validateInput()) return;
+
+    setLoading(true);
+    setButtonText('Creating...');
+
+    try {
+      insertProduct(
+        { name, price: parseFloat(price), image },
+        {
+          onSuccess: () => {
+            setSuccessMessage('Product created successfully!');
+            resetFields();
+            setButtonText('Create');
+            Alert.alert('Success', 'Product created successfully!', [
+              { text: 'OK', onPress: () => console.log('OK Pressed') },
+            ]);
+          },
+          onError: (err: any) => setError(err.message),
         }
-
-        console.log('Creating Product: ', name);
-
-        // saving to a database
-
-        resetFields()
+      );
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    
-    const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
-          //mediaTypes: ImagePicker.MediaTypeOptions.All,
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [4, 3],
-          quality: 1,
-        });
-    
-        // console.log(result);
-    
-        if (!result.canceled) {
-          setImage(result.assets[0].uri);
-        }
-      };
+  const onSubmit = async () => {
+    if (isUpdating) {
+      await onUpdate();
+    } else {
+      await onCreate();
+    }
+  };
 
-    return (
-        <View style={styles.container}>
-            <Stack.Screen options={{title: isUpdating ? "Update Product":"Create Product", headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20}}} />
-            <Image source={{uri: image || defaultPizzaImage}} style={styles.image} />
-            <Text onPress={pickImage } style={styles.textButton}>Select image</Text>
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-            <Text style={styles.label}>Name</Text>
-            <TextInput 
-                value={name} 
-                onChangeText={setName}  
-                placeholder="Name" 
-                style={styles.input}
-            />
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
-            <Text style={styles.label}>Price (R)</Text>
-            <TextInput 
-                value={price} 
-                onChangeText={setPrice}
-                placeholder="99.99" 
-                style={styles.input} 
-                keyboardType="numeric"
-            />
+  return (
+    <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: isUpdating ? 'Update Product' : 'Create Product',
+          headerTitleStyle: { color: Colors.light.adminBtn, fontSize: 20 },
+        }}
+      />
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Image source={{ uri: image || defaultPizzaImage }} style={styles.image} />
+      <Text onPress={pickImage} style={styles.textButton}>Select image</Text>
 
-            <ButtonAdmin  onPress={onSubmit} text={isUpdating ? "Updating" : "Create" } />
-            {isUpdating && 
-                <Text onPress={confirmDelete} style={styles.textButton}>
-                    Delete
-                </Text>
-            }
-        </View>
-    );
-}
+      <Text style={styles.label}>Name</Text>
+      <TextInput
+        value={name}
+        onChangeText={setName}
+        placeholder="Name"
+        style={styles.input}
+      />
+
+      <Text style={styles.label}>Price (R)</Text>
+      <TextInput
+        value={price}
+        onChangeText={setPrice}
+        placeholder="99.99"
+        style={styles.input}
+        keyboardType="numeric"
+      />
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
+
+      <ButtonAdmin onPress={onSubmit} text={loading ? 'Processing...' : buttonText} disabled={loading} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 10,
-        backgroundColor: 'gainsboro',
-    },
-    input: {
-        backgroundColor: 'white', 
-        padding: 10, 
-        borderRadius: 5,
-        marginTop: 5,
-        marginBottom: 20,
-    },
-    label: {
-        color: "black",
-        fontSize: 16,
-    },
-    error: {
-        color: 'red',
-        marginBottom: 10,
-    },
-    image:{
-        width: '50%',
-        aspectRatio: 1,
-        alignSelf: 'center',
-    },
-    textButton:{
-        alignSelf: 'center',
-        fontWeight:'bold',
-        color: Colors.light.tint,
-        marginVertical: 10,
-    },
-})
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: 'gainsboro',
+  },
+  input: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    marginBottom: 20,
+  },
+  label: {
+    color: 'black',
+    fontSize: 16,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  success: {
+    color: 'green',
+    marginBottom: 10,
+  },
+  image: {
+    width: '50%',
+    aspectRatio: 1,
+    alignSelf: 'center',
+  },
+  textButton: {
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: Colors.light.tint,
+    marginVertical: 10,
+  },
+});
 
-export default CreateProductScreen
+export default CreateProductScreen;

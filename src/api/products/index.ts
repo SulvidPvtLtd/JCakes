@@ -61,3 +61,26 @@ export const useInsertProduct = () => {
     },
   });
 };
+
+
+// Hook for updating an existing product
+export const useUpdateProduct = () => {
+  return useMutation({
+    async mutationFn(data: { id: number; name: string; image: string | null; price: number }) {
+      const { data: updatedProduct, error } = await supabase
+        .from('products')
+        .update({
+          name: data.name,
+          image: data.image,
+          price: data.price,
+        })
+        .eq('id', data.id) // Filter by product ID to update the correct product
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return updatedProduct;
+    },
+  });
+};
