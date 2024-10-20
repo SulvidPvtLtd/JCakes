@@ -9,16 +9,23 @@ import { useRouter } from "expo-router";
    Return Type: The result will be an array of products.
 */
 export const useProductList = () => {
-    return useQuery({
-        queryKey: ['products'], // The key is for caching the query.
-        queryFn: async () => {
-          const { data, error } = await supabase.from('products').select('*');
-          if (error) {
-            throw new Error(error.message);
-          }
-          return data;
-        }
-      });
+  return useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      // Fetch only necessary columns to optimize query performance
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, image'); // Select only relevant columns
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    staleTime: 1000 * 60 * 5, // Cache the result for 5 minutes to prevent frequent refetches
+    refetchOnWindowFocus: false, // Avoid refetching when the window regains focus (optional)
+  });
 };
 
 /*
@@ -90,6 +97,7 @@ export const useUpdateProduct = () => {
           price: data.price,
         })
         .eq('id', data.id) // Filter by product ID to update the correct product
+        .select('*')    
         .single();
 
       if (error) {
@@ -99,8 +107,9 @@ export const useUpdateProduct = () => {
     },
     
     // On success, invalidate the product list and navigate back to the previous page
-    onSuccess: async () => {
+    onSuccess: async (_, {id}) => {  // The underscore is a convention used when a variable is not needed and can be ignored.
       await queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate product list query to refetch the updated data
+      await queryClient.invalidateQueries({ queryKey: ['products', id] });
       router.back(); // Navigate back after the update
     },
     

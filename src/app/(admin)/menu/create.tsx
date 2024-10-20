@@ -1,11 +1,11 @@
 import { Alert, View, Text, TextInput, StyleSheet, Image } from 'react-native';
 import ButtonAdmin from '@/src/components/ButtonAdmin';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useInsertProduct, useUpdateProduct } from '@/src/api/products';
+import { useInsertProduct, useProduct, useUpdateProduct } from '@/src/api/products';
 
 const CreateProductScreen: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -16,12 +16,23 @@ const CreateProductScreen: React.FC = () => {
   const [buttonText, setButtonText] = useState('Submit');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
-  const { id } = useLocalSearchParams();
+  const { id: idString } = useLocalSearchParams();
+  const id = parseFloat(typeof idString === 'string' ? idString : idString[0]);
   const isUpdating = !!id;
 
   const { mutate: insertProduct } = useInsertProduct();
   const { mutate: updateProduct } = useUpdateProduct();
+  const { data: upadatingProduct } = useProduct(id);
+  
   const router = useRouter();
+
+  useEffect(() => {
+    if (isUpdating && upadatingProduct) {
+      setName(upadatingProduct.name);
+      setPrice(upadatingProduct.price.toString());
+      setImage(upadatingProduct.image);
+    }
+  }, [isUpdating, upadatingProduct])
 
   const resetFields = useCallback(() => {
     setName('');
@@ -57,7 +68,7 @@ const CreateProductScreen: React.FC = () => {
 
     try {
       updateProduct(
-        { id: Number(id), name, price: parseFloat(price), image },
+        { id, name, price: parseFloat(price), image },
         {
           onSuccess: () => {
             setSuccessMessage('Product updated successfully!');
