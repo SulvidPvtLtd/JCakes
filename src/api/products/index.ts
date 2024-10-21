@@ -118,3 +118,33 @@ export const useUpdateProduct = () => {
     },
   });
 };
+
+// Hook for deleting a product
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient(); // Get the query client for invalidation
+
+  return useMutation({
+    async mutationFn(id: number) {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id); // Specify the product to delete by its ID
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return id; // Return the ID of the deleted product
+    },
+    
+    // On success, invalidate the product list to ensure updated data is fetched
+    onSuccess: async (deletedId) => {
+      await queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate product list query
+      await queryClient.invalidateQueries({ queryKey: ['product', deletedId] }); // Invalidate specific product query if it exists
+    },
+
+    onError: (error) => {
+      console.error("Error deleting product:", error.message); // Handle any errors that occur during deletion
+    },
+  });
+};

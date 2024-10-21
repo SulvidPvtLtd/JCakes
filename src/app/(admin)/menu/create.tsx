@@ -1,11 +1,11 @@
-import { Alert, View, Text, TextInput, StyleSheet, Image } from 'react-native';
+import { Alert, View, Text, TextInput, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import ButtonAdmin from '@/src/components/ButtonAdmin';
 import React, { useState, useCallback, useEffect } from 'react';
 import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useInsertProduct, useProduct, useUpdateProduct } from '@/src/api/products';
+import { useInsertProduct, useProduct, useUpdateProduct, useDeleteProduct } from '@/src/api/products'; // Import the delete hook
 
 const CreateProductScreen: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -15,24 +15,25 @@ const CreateProductScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [buttonText, setButtonText] = useState('Submit');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [deleting, setDeleting] = useState(false); // New state for deleting
 
-  const { id: idString } = useLocalSearchParams();
-  const id = parseFloat(typeof idString === 'string' ? idString : idString[0]);
+  const { id } = useLocalSearchParams();
   const isUpdating = !!id;
 
   const { mutate: insertProduct } = useInsertProduct();
   const { mutate: updateProduct } = useUpdateProduct();
-  const { data: upadatingProduct } = useProduct(id);
+  const { data: updatingProduct } = useProduct(Number(id));
+  const { mutate: deleteProduct } = useDeleteProduct(); // Initialize delete hook
   
   const router = useRouter();
 
   useEffect(() => {
-    if (isUpdating && upadatingProduct) {
-      setName(upadatingProduct.name);
-      setPrice(upadatingProduct.price.toString());
-      setImage(upadatingProduct.image);
+    if (isUpdating && updatingProduct) {
+      setName(updatingProduct.name);
+      setPrice(updatingProduct.price.toString());
+      setImage(updatingProduct.image);
     }
-  }, [isUpdating, upadatingProduct])
+  }, [isUpdating, updatingProduct]);
 
   const resetFields = useCallback(() => {
     setName('');
@@ -67,15 +68,17 @@ const CreateProductScreen: React.FC = () => {
     setButtonText('Updating...');
 
     try {
+      const productId = Array.isArray(id) ? Number(id[0]) : Number(id);
+
       updateProduct(
-        { id, name, price: parseFloat(price), image },
+        { id: productId, name, price: parseFloat(price), image },
         {
           onSuccess: () => {
             setSuccessMessage('Product updated successfully!');
             resetFields();
             setButtonText('Create');
             Alert.alert('Success', 'Product updated successfully!', [
-              { text: 'OK', onPress: () => {router.back()} }, // You can add navigation logic here
+              { text: 'OK', onPress: () => { router.back(); } }, // Use router.back() to go to the previous page
             ]);
           },
           onError: (err: any) => setError(err.message),
@@ -103,7 +106,7 @@ const CreateProductScreen: React.FC = () => {
             resetFields();
             setButtonText('Create');
             Alert.alert('Success', 'Product created successfully!', [
-              { text: 'OK', onPress: () => console.log('OK Pressed') },
+              { text: 'OK', onPress: () => router.back() }, // Use router.back() to navigate back after creating
             ]);
           },
           onError: (err: any) => setError(err.message),
@@ -124,6 +127,39 @@ const CreateProductScreen: React.FC = () => {
     }
   };
 
+  const handleDeleteProduct = () => {
+    if (!id) {
+      return; // No product ID to delete if it's a create action
+    }
+
+    Alert.alert(
+      'Delete Product',
+      'Are you sure you want to delete this product?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          onPress: () => {
+            setDeleting(true); // Set deleting state to true
+            deleteProduct(Number(id), {
+              onSuccess: () => {
+                setDeleting(false); // Reset deleting state
+                Alert.alert('Success', 'Product deleted successfully!', [
+                  { text: 'OK', onPress: () => router.push('/(admin)/menu/') }, // Use router.back() to navigate back after deleting
+                ]);
+              },
+              onError: (err: any) => {
+                setDeleting(false); // Reset deleting state
+                setError(err.message);
+              },
+            });
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -136,6 +172,9 @@ const CreateProductScreen: React.FC = () => {
       setImage(result.assets[0].uri);
     }
   };
+
+  // Determine whether buttons should be disabled
+  const isButtonDisabled = loading || deleting;
 
   return (
     <View style={styles.container}>
@@ -169,7 +208,26 @@ const CreateProductScreen: React.FC = () => {
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
 
-      <ButtonAdmin onPress={onSubmit} text={loading ? 'Processing...' : buttonText} disabled={loading} />
+      <ButtonAdmin 
+        onPress={onSubmit} 
+        text={loading ? 'Processing...' : buttonText} 
+        disabled={isButtonDisabled} // Disable if loading or deleting
+      />
+      
+      {/* Add delete button for update product page */}
+      {isUpdating && (
+        <ButtonAdmin 
+          onPress={handleDeleteProduct} 
+          text="Delete Product" 
+          disabled={isButtonDisabled}  // Disable if loading or deleting
+          style={{ backgroundColor: 'red' }} // Optional styling for visibility
+        />
+      )}
+
+      {/* Show Activity Indicator while deleting */}
+      {deleting && (
+        <ActivityIndicator size="large" color={Colors.light.tint} style={styles.activityIndicator} />
+      )}
     </View>
   );
 };
@@ -210,6 +268,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.light.tint,
     marginVertical: 10,
+  },
+  activityIndicator: {
+    marginTop: 20, // Add some space above the ActivityIndicator
+    alignSelf: 'center', // Center the ActivityIndicator
   },
 });
 
