@@ -17,12 +17,13 @@ const CreateProductScreen: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [deleting, setDeleting] = useState(false); // New state for deleting
 
-  const { id } = useLocalSearchParams();
-  const isUpdating = !!id;
+  const { id: idString } = useLocalSearchParams();
+  const id = parseFloat(typeof idString === 'string' ? idString : idString?.[0]); //the ?. operator is called the optional chaining operator. It allows you to safely access deeply nested properties of an object without causing an error if any part of the chain is null or undefined
+  const isUpdating = !!idString;                  //  !!idString is a shorthand way to convert idString to a boolean 
 
   const { mutate: insertProduct } = useInsertProduct();
   const { mutate: updateProduct } = useUpdateProduct();
-  const { data: updatingProduct } = useProduct(Number(id));
+  const { data: updatingProduct } = useProduct(id);
   const { mutate: deleteProduct } = useDeleteProduct(); // Initialize delete hook
   
   const router = useRouter();
@@ -145,7 +146,7 @@ const CreateProductScreen: React.FC = () => {
               onSuccess: () => {
                 setDeleting(false); // Reset deleting state
                 Alert.alert('Success', 'Product deleted successfully!', [
-                  { text: 'OK', onPress: () => router.push('/(admin)/menu/') }, // Use router.back() to navigate back after deleting
+                  { text: 'OK', onPress: () => router.replace('/(admin)') }, // Use router.back() to navigate back after deleting
                 ]);
               },
               onError: (err: any) => {
