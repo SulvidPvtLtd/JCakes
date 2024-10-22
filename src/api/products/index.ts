@@ -1,7 +1,9 @@
 import { supabase } from "@/src/lib/supabase";
-import { Product } from "@/src/types";
+import { Tables } from "@/src/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+
+type Product = Tables<'products'>;
 
 /* useProductList: This hook is for fetching a list of all products from the database.
    The queryKey is ['products'], which identifies that this query is for fetching the list of products. This key helps with caching and refetching logic.
