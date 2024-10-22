@@ -1,9 +1,11 @@
 import { createContext , PropsWithChildren, useContext, useState} from "react";
 
 // Import and declare data custom types
-import {CartItem, Product} from '@/src/types';
+import {CartItem, Tables} from '@/src/types';
 // A library that can help with key values.
 import {randomUUID} from 'expo-crypto';
+
+type Product = Tables<'products'>;
 
 type CartType = {
     items: CartItem[],

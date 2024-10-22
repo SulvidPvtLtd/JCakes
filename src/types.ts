@@ -1,15 +1,23 @@
-export type Product = {
-  id: number;
-  image: string | null;
-  name: string;
-  price: number;
-};
+import { Database } from './database.types';
+
+export type Tables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Row'];
+export type Enums<T extends keyof Database['public']['Enums']> =
+  Database['public']['Enums'][T];
+
+// The helper function above will give us the below types from supabase.
+// export type Product = {
+//   id: number;
+//   image: string | null;
+//   name: string;
+//   price: number;
+// };
 
 export type PizzaSize = 'S' | 'M' | 'L' | 'XL';
 
 export type CartItem = {
   id: string;
-  product: Product;
+  product: Tables<'products'>;
   product_id: number;
   size: PizzaSize;
   quantity: number;
