@@ -1,6 +1,7 @@
 import { supabase } from "@/src/lib/supabase";
 import { useAuth } from "@/src/providers/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
+import { InsertTables } from "@/src/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 export const useAdminOrderList = ({archived = false}) => {
@@ -56,3 +57,36 @@ export const useAdminOrderList = ({archived = false}) => {
       refetchOnWindowFocus: false, // Avoid refetching when the window regains focus (optional)
     });
   };
+
+
+  // Hook for creating a Order
+export const useInsertOrder = () => {
+
+  const QueryClient = useQueryClient();
+  const {session} = useAuth();
+  const userId = session?.user?.id;
+
+  return useMutation({
+    async mutationFn(data: InsertTables<'orders'>){
+      //receive `data` and do something with it.
+     const {data: newProduct, error} = await supabase
+     .from('orders')
+     .insert({...data, user_id: userId})
+     .single(); 
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return newProduct;
+    },
+
+    // This code make the new product rnder immidiately on the page instaed of waiting for the app to reload.
+    async onSuccess(){
+      await QueryClient.invalidateQueries({queryKey: ['products']});
+    },
+    // onError(error){
+    //   console.log(error);
+    // }   
+
+  });
+};

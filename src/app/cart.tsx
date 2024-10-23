@@ -11,7 +11,7 @@ const CartScreen = () => {
 
   // declare an object as a variable that will allow you to get
   // the values from `CartContext.Provider`'s items
-  const {items, total} = useCart();
+  const {items, total, checkout} = useCart();
 
   return (
     <View style={{padding:10,}}>
@@ -25,7 +25,7 @@ const CartScreen = () => {
         Total: ${total.toFixed(2)}
       </Text>
 
-      <ButtonUser text="Checkout" />
+      <ButtonUser onPress={checkout} text="Checkout" />
 
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
     </View>

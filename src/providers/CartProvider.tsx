@@ -16,6 +16,7 @@ type CartType = {
     addItem: (product: Product, size: CartItem['size']) => void
     updateQuantity:(itemId: string, amount: -1 | 1) => void;
     total: number;
+    checkout: () => void;
 } 
 
 const CartContext = createContext<CartType>({
@@ -23,6 +24,7 @@ const CartContext = createContext<CartType>({
     addItem: () => {},
     updateQuantity: () =>{},
     total: 0,
+    checkout: () => {}
 });
 
 //Provide values: such that all the children of the CartProvider will have access to CartContext.Provider.
@@ -68,8 +70,13 @@ const CartProvider = ({ children }: PropsWithChildren)=>{
     // Item, is the value of the item we are looping through.
     const total = items.reduce((sum, item) => (sum += item.product.price * item.quantity), 0 );
 
+    const checkout = () => {
+        console.warn('Checkout');
+        //setItems([]);
+    }
+
     return(
-        <CartContext.Provider value={{items, addItem, updateQuantity, total }}>
+        <CartContext.Provider value={{items, addItem, updateQuantity, total, checkout }}>
             {children}
         </CartContext.Provider>
     );
