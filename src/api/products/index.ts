@@ -150,3 +150,21 @@ export const useDeleteProduct = () => {
     },
   });
 };
+
+
+export const useOrderDetails = (id: number) => {
+  return useQuery({
+    queryKey: ['orders', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single(); // This makes sure it takes 1 item as an object an no as an array.
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+};

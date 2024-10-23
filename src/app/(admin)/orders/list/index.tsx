@@ -7,7 +7,7 @@ import { useAdminOrderList } from '@/src/api/orders';
 
 const OrderScreen = () => {
 
-  const {data: orders, isLoading, error} = useAdminOrderList();
+  const {data: orders, isLoading, error} = useAdminOrderList({archived: false});
 
   if (isLoading) return <ActivityIndicator/>
   if (error) return <Text>Error: {error.message}</Text>

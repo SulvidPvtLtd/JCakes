@@ -3,14 +3,19 @@ import { useAuth } from "@/src/providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 
-export const useAdminOrderList = () => {
-    return useQuery({
-      queryKey: ['orders'],
+export const useAdminOrderList = ({archived = false}) => {
+   
+  const statuses = archived ? ['Delivered'] : ['New', 'Cooking', 'Delivering'];
+
+  return useQuery({
+      queryKey: ['orders', {archived}],
       queryFn: async (orders) => {
         // Fetch only necessary columns to optimize query performance
         const { data, error } = await supabase
           .from('orders')
-          .select('*');  // For admin we have to query all th orders
+          .select('*').in(
+            'status', statuses
+          );  // For admin we have to query all th orders
   
         if (error) {
           throw new Error(error.message);
