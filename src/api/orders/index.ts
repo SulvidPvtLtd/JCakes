@@ -72,6 +72,7 @@ export const useInsertOrder = () => {
      const {data: newProduct, error} = await supabase
      .from('orders')
      .insert({...data, user_id: userId})
+     .select()
      .single(); 
 
       if (error) {

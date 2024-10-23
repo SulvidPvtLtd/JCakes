@@ -4,6 +4,8 @@ import { createContext , PropsWithChildren, useContext, useState} from "react";
 import {CartItem, Tables} from '@/src/types';
 // A library that can help with key values.
 import {randomUUID} from 'expo-crypto';
+import { useInsertOrder } from "../api/orders";
+import { useRouter } from "expo-router";
 
 type Product = Tables<'products'>;
 
@@ -34,6 +36,9 @@ const CartContext = createContext<CartType>({
 const CartProvider = ({ children }: PropsWithChildren)=>{
 
     const [items, setItems] = useState<CartItem[]>([]);
+
+    const { mutate: insertOrder} = useInsertOrder();
+    const router = useRouter()
 
     const addItem = (product: Product, size: CartItem['size'])  => {
 
@@ -70,9 +75,18 @@ const CartProvider = ({ children }: PropsWithChildren)=>{
     // Item, is the value of the item we are looping through.
     const total = items.reduce((sum, item) => (sum += item.product.price * item.quantity), 0 );
 
+    const clearCart = () => {
+        setItems([]);
+    }
+
     const checkout = () => {
-        console.warn('Checkout');
-        //setItems([]);
+        //console.warn('Checkout');
+        insertOrder({total}, {
+            onSuccess: (data)=>{
+                console.log(data);
+                clearCart();
+                router.push(`/(user)/orders/${data.id}`);
+        }});
     }
 
     return(
