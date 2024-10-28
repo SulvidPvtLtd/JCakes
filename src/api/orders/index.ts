@@ -1,93 +1,124 @@
 import { supabase } from "@/src/lib/supabase";
 import { useAuth } from "@/src/providers/AuthProvider";
-import { InsertTables } from "@/src/types";
+import { InsertTables, Order } from "@/src/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
-export const useAdminOrderList = ({archived = false}) => {
-   
-  const statuses = archived ? ['Delivered'] : ['New', 'Cooking', 'Delivering'];
+export const useAdminOrderList = ({ archived = false }) => {
+  const statuses = archived ? ['Delivered','Cancelled'] : ['New', 'Cooking', 'Delivering'];
 
   return useQuery({
-      queryKey: ['orders', {archived}],
-      queryFn: async (orders) => {
-        // Fetch only necessary columns to optimize query performance
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*').in(
-            'status', statuses
-          );  // For admin we have to query all th orders
-  
-        if (error) {
-          throw new Error(error.message);
-        }
-  
-        return data;
-      },
-      staleTime: 1000 * 60 * 5, // Cache the result for 5 minutes to prevent frequent refetches
-      refetchOnWindowFocus: false, // Avoid refetching when the window regains focus (optional)
-    });
-  };
+    queryKey: ['orders', { archived }],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .in('status', statuses)
+        .order('created_at', { ascending: false });
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+};
 
 
-  export const useMyAdminOrderList = () => {
+// Hook to dislay list of orders on the User side.
+export const useMyOrderList = () => {
+  const { session } = useAuth();
+  const id = session?.user.id;
 
-    const {session} = useAuth();
-    const id = session?.user?.id;
+  return useQuery({
+    queryKey: ['orders', { userId: id }],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+};
 
-    return useQuery({
-      queryKey: ['orders', {userId: id}],  // 2nd parameter added to differentiate from one above, so that the data won't be confuded with in cache storage.
-      queryFn: async (orders) => {
+export const useOrderDetails = (id: number) => {
+  return useQuery<Order>({
+    queryKey: ['orders', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*, products(*))')
+        .eq('id', id)
+        .single();
 
-        if(!id) return null;
+      if (error) {
+        throw new Error(error.message);
+      }
+      //return data as Order;
+      if (!data) {
+        throw new Error('Order not found');
+      }
+      return data as Order;
+    },
+  });
+};
 
-        // Fetch only necessary columns to optimize query performance
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('user_id', id);  // For admin we have to query all th orders
-  
-        if (error) {
-          throw new Error(error.message);
-        }
-  
-        return data;
-      },
-      staleTime: 1000 * 60 * 5, // Cache the result for 5 minutes to prevent frequent refetches
-      refetchOnWindowFocus: false, // Avoid refetching when the window regains focus (optional)
-    });
-  };
-
-
-  // Hook for creating a Order
+// Hook for creating a Order
 export const useInsertOrder = () => {
-
-  const QueryClient = useQueryClient();
-  const {session} = useAuth();
-  const userId = session?.user?.id;
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const userId = session?.user.id;
 
   return useMutation({
-    async mutationFn(data: InsertTables<'orders'>){
-      //receive `data` and do something with it.
-     const {data: newProduct, error} = await supabase
-     .from('orders')
-     .insert({...data, user_id: userId})
-     .select()
-     .single(); 
+    async mutationFn(data: InsertTables<'orders'>) {
+      const { error, data: newProduct } = await supabase
+        .from('orders')
+        .insert({ ...data, user_id: userId })
+        .select()
+        .single();
 
       if (error) {
         throw new Error(error.message);
       }
       return newProduct;
     },
-
-    // This code make the new product rnder immidiately on the page instaed of waiting for the app to reload.
-    async onSuccess(){
-      await QueryClient.invalidateQueries({queryKey: ['products']});
-    },
-    // onError(error){
-    //   console.log(error);
-    // }   
-
+    async onSuccess() {
+      await queryClient.invalidateQueries({queryKey:['orders']});
+    }
   });
 };
+
+// export const useUpdateOrder = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     async mutationFn({
+//       id,
+//       updatedFields,
+//     }: {
+//       id: number;
+//       updatedFields: UpdateTables<'orders'>;
+//     }) {
+//       const { error, data: updatedOrder } = await supabase
+//         .from('orders')
+//         .update(updatedFields)
+//         .eq('id', id)
+//         .select()
+//         .single();
+
+//       if (error) {
+//         throw new Error(error.message);
+//       }
+//       return updatedOrder;
+//     },
+//     async onSuccess(_, { id }) {
+//       await queryClient.invalidateQueries({queryKey:['orders']});
+//       await queryClient.invalidateQueries({queryKey:['orders', id]});
+//     },
+//   });
+// };

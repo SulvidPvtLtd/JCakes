@@ -3,11 +3,11 @@
 // the / (user)/_layout.tsx so as to avoid dupliaction when rendering.
 import { View, Text, FlatList, ActivityIndicator} from 'react-native'
 import OrderListItem from '@/src/components/OrderListItem'
-import { useMyAdminOrderList } from '@/src/api/orders'
+import { useMyOrderList } from '@/src/api/orders'
 
-const OrderScreen = () => {
+export default function OrderScreen() {
 
-  const {data: orders, isLoading, error} = useMyAdminOrderList()
+  const {data: orders, isLoading, error} = useMyOrderList()
   if(isLoading){
     return<ActivityIndicator/>
   }
@@ -21,8 +21,8 @@ const OrderScreen = () => {
         renderItem={({item}) => ( <OrderListItem order={item} />  )}
         contentContainerStyle={{gap: 10, padding: 10}} 
     />       
-  )
+  );
 }
 
-export default OrderScreen
+
 

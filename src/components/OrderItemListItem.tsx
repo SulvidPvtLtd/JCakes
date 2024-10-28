@@ -8,6 +8,7 @@ type OrderItemListItemProps = {
   item: OrderItem;
 };
 
+// displays details for an individual item within an order.
 const OrderItemListItem = ({ item }: OrderItemListItemProps) => {
   return (
     <View style={styles.container}>

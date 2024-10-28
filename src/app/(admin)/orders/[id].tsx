@@ -6,13 +6,14 @@ import OrderItemListItem from '@/src//components/OrderItemListItem';
 import OrderListItem from '@/src/components/OrderListItem';
 import Colors from '@/src/constants/Colors';
 import { OrderStatusList } from '@/src/types';
-import { useOrderDetails } from '@/src/api/products';
+import { useOrderDetails } from '@/src/api/orders';
 
 const OrderDetailScreen = () => {
-  const { id: idString } = useLocalSearchParams();
-  const id = parseFloat(typeof idString === 'string' ? idString : idString[0]);
-  const {data: order, isLoading, error} = useOrderDetails(id);
   
+  const { id: idString } = useLocalSearchParams();                              // This is an array of strings. 
+  const id = parseFloat(typeof idString === 'string' ? idString : idString[0]); // Converting the id in string type to number type.
+
+  const {data: order, error, isLoading} = useOrderDetails(id);
   if (isLoading) {
     return <ActivityIndicator/>;
   }
@@ -22,7 +23,7 @@ const OrderDetailScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: `Detailed List #${order.id} `, headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20} }} />
+      <Stack.Screen options={{ title: `Detailed List #${order?.id} `, headerTitleStyle:{color:Colors.light.adminBtn, fontSize: 20} }} />
 
       <OrderListItem order={order} />
 

@@ -1,25 +1,30 @@
 //This will render a list of orders.
 // The hader from user layout should be hidden in 
 // the / (user)/_layout.tsx so as to avoid dupliaction when rendering.
-import { View, Text, FlatList, ActivityIndicator} from 'react-native'
+import { Text, FlatList, ActivityIndicator} from 'react-native'
 import OrderListItem from '@/src/components/OrderListItem'
 import { useAdminOrderList } from '@/src/api/orders';
 
-const OrderScreen = () => {
+//This function will read the list of orders.
+export default function OrderScreen(){
 
-  const {data: orders, isLoading, error} = useAdminOrderList({archived: false});
+  const {
+    data: orders, 
+    isLoading, 
+    error
+  } = useAdminOrderList({archived: false});
 
   if (isLoading) return <ActivityIndicator/>
-  if (error) return <Text>Error: {error.message}</Text>
+  if (error) return <Text>Failed to fetch lidt of orders. </Text>
 
   return (
     <FlatList    
         data={orders}
         renderItem={({item}) => ( <OrderListItem order={item} />  )}
         contentContainerStyle={{gap: 10, padding: 10}} 
-    />       
+    />
   )
 }
 
-export default OrderScreen
+
 

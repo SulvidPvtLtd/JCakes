@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import React from 'react';
-import { Tables } from '../types';
+import { Order, Tables } from '../types';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import dayjs from 'dayjs';
 import { Link, useSegments } from 'expo-router';
@@ -11,6 +11,7 @@ type OrderListItemProps = {
   order: Tables<'orders'>;
 };
 
+// displays an individual order's details
 const OrderListItem = ({ order }: OrderListItemProps) => {
   const segments = useSegments();
 

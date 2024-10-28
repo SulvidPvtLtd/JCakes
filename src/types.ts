@@ -32,9 +32,10 @@ export const OrderStatusList: OrderStatus[] = [
   'Cooking',
   'Delivering',
   'Delivered',
+  'Cancelled',
 ];
 
-export type OrderStatus = 'New' | 'Cooking' | 'Delivering' | 'Delivered';
+export type OrderStatus = 'New' | 'Cooking' | 'Delivering' | 'Delivered'| 'Cancelled';
 
 export type Order = {
   id: number;

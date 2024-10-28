@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 type Product = Tables<'products'>;
 
 type CartType = {
-    items: CartItem[],
+    items: CartItem[];
     // Declare a function that will receive a new item of type CartItem, 
     // it will do something and give us nothing.
     // addItem: (item: CartItem) => void; 

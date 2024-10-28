@@ -1,9 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
-import { Tables } from "@/src/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-
-type Product = Tables<'products'>;
 
 /* useProductList: This hook is for fetching a list of all products from the database.
    The queryKey is ['products'], which identifies that this query is for fetching the list of products. This key helps with caching and refetching logic.
@@ -14,19 +11,12 @@ export const useProductList = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // Fetch only necessary columns to optimize query performance
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, price, image'); // Select only relevant columns
-
+      const { data, error } = await supabase.from('products').select('*');
       if (error) {
         throw new Error(error.message);
       }
-
       return data;
     },
-    staleTime: 1000 * 60 * 5, // Cache the result for 5 minutes to prevent frequent refetches
-    refetchOnWindowFocus: false, // Avoid refetching when the window regains focus (optional)
   });
 };
 
@@ -36,14 +26,15 @@ export const useProductList = () => {
   The queryFn makes a call to supabase to retrieve a product based on its id. The .eq('id', id) filters the query for the product with the specified id, and .single() ensures the result is returned as a single object (not as an array).
 */ 
 export const useProduct = (id: number) => {
-  return useQuery<Product>({
-    queryKey: ['product', id],
+  return useQuery({
+    queryKey: ['products', id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('id', id)
-        .single(); // This makes sure it takes 1 item as an object an no as an array.
+        .single();
+
       if (error) {
         throw new Error(error.message);
       }
@@ -54,32 +45,27 @@ export const useProduct = (id: number) => {
 
 // Hook for creating a product
 export const useInsertProduct = () => {
-
-  const QueryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    async mutationFn(data: any){
-      //receive `data` and do something with it.
-     const {data: newProduct, error} = await supabase.from('products').insert({
-        name: data.name,
-        image: data.image,
-        price: data.price,
-      }).single(); 
+    async mutationFn(data: any) {
+      const { error, data: newProduct } = await supabase
+        .from('products')
+        .insert({
+          name: data.name,
+          image: data.image,
+          price: data.price,
+        })
+        .single();
 
       if (error) {
         throw new Error(error.message);
       }
       return newProduct;
     },
-
-    // This code make the new product rnder immidiately on the page instaed of waiting for the app to reload.
-    async onSuccess(){
-      await QueryClient.invalidateQueries({queryKey: ['products']});
+    async onSuccess() {
+      await queryClient.invalidateQueries({queryKey:['products']});
     },
-    // onError(error){
-    //   console.log(error);
-    // }   
-
   });
 };
 
@@ -149,22 +135,5 @@ export const useDeleteProduct = () => {
       console.error("Error deleting product:", error.message); // Handle any errors that occur during deletion
     },
   });
-};
+}
 
-
-export const useOrderDetails = (id: number) => {
-  return useQuery({
-    queryKey: ['orders', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', id)
-        .single(); // This makes sure it takes 1 item as an object an no as an array.
-      if (error) {
-        throw new Error(error.message);
-      }
-      return data;
-    },
-  });
-};
