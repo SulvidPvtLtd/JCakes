@@ -33,6 +33,7 @@ const CartContext = createContext<CartType>({
 //Provide values: such that all the children of the CartProvider will have access to CartContext.Provider.
 //This will be used to wrapp around the screens that needs the CartProvider.
 // This means all the screens in our application
+// `items` represent data from `o
 
 const CartProvider = ({ children }: PropsWithChildren)=>{
 

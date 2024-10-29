@@ -6,7 +6,8 @@ import OrderItemListItem from '@/src//components/OrderItemListItem';
 import OrderListItem from '@/src/components/OrderListItem';
 import Colors from '@/src/constants/Colors';
 import { OrderStatusList } from '@/src/types';
-import { useOrderDetails } from '@/src/api/orders';
+import { useOrderDetails, useUpdateOrder } from '@/src/api/orders';
+
 
 const OrderDetailScreen = () => {
   
@@ -14,12 +15,20 @@ const OrderDetailScreen = () => {
   const id = parseFloat(typeof idString === 'string' ? idString : idString[0]); // Converting the id in string type to number type.
 
   const {data: order, error, isLoading} = useOrderDetails(id);
+  const {mutate: updateOrder} = useUpdateOrder();
+ 
+  const updateStatus = (status: string) => {
+    updateOrder({id: id, updatedFields: {status}});
+  };
+  
   if (isLoading) {
     return <ActivityIndicator/>;
   }
-  if (error) {
+  if (error || !order) {
     return <Text>Failed to fetch order</Text>;
   }
+
+  console.log(order);
 
   return (
     <View style={styles.container}>
@@ -37,7 +46,8 @@ const OrderDetailScreen = () => {
             {OrderStatusList.map((status) => (
               <Pressable
                 key={status}
-                onPress={() => console.warn('Update status')}
+                //onPress={() => console.warn('Update status')}
+                onPress={() => updateStatus(status)}
                 style={{
                   borderColor: Colors.light.adminBtn,
                   borderWidth: 1,
