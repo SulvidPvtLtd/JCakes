@@ -4,6 +4,7 @@ import { InsertTables, Order, UpdateTables } from "@/src/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
+
 export const useAdminOrderList = ({ archived = false }) => {
   const statuses = archived ? ['Delivered','Cancelled'] : ['New', 'Cooking', 'Delivering'];
 
