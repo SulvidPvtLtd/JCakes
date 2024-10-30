@@ -23,3 +23,30 @@ export const useInsertOrderSubscription = () => {
         };
     },[])
 }
+
+export const useUpdateOrderSubscription = (id: number) => {
+ // her id: number is the id of the order number that is being updated
+ const queryClient = useQueryClient();
+ useEffect(() => {
+    const orders = supabase
+      .channel('custom-filter-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          // refetch(); instead of refetch you can just invalidate the query.
+          queryClient.invalidateQueries({ queryKey: ['orders', id] });
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      orders.unsubscribe();
+    };
+  }, []);
+};

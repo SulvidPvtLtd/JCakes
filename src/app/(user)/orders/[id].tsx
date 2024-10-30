@@ -4,16 +4,22 @@ import OrderListItem from '@/src/components/OrderListItem';
 import { useOrderDetails } from '@/src/api/orders';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useUpdateOrderSubscription } from '@/src/api/orders/subscriptions';
 
 const OrderDetailScreen = () => {
   const { id: idString } = useLocalSearchParams();                              // This is an array of strings. 
   const id = parseFloat(typeof idString === 'string' ? idString : idString[0]); // Converting the id in string type to number type.
 
   const {data: order, error, isLoading} = useOrderDetails(id);
+  
+  useUpdateOrderSubscription(id);
+
+
+  
   if (isLoading) {
     return <ActivityIndicator/>;
   }
-  if (error) {
+  if (error || !order) {
     return <Text>Failed to fetch order</Text>;
   }
 
