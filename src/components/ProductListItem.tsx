@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import Colors from '@/src/constants/Colors';
 import { Tables } from '../types';
 import { Link, useSegments } from 'expo-router';
+import RemoteImage from './RemoteImage';
 
 export const defaultPizzaImage = 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/default.png';
 
@@ -27,9 +28,14 @@ const ProductListItem = ({product}: ProductListItemProps) =>{
     // Uses the first segment dynamically instead of hardcoding "(user)"
     <Link href={`/${currentSegment}/menu/${product.id}`} asChild>
       <Pressable style={styles.container}>         
-        
-        <Image source={{ uri:product.image || defaultPizzaImage }}  style={styles.image} resizeMode='contain'/>
-
+        {/*This code is for extracting and saving on device storage instead of extrenal storage*/}
+        {/*<Image source={{ uri:product.image || defaultPizzaImage }}  style={styles.image} resizeMode='contain'/>*/}
+        <RemoteImage 
+          path={product?.image}  
+          fallback={defaultPizzaImage}
+          style={styles.image} 
+          resizeMode='contain'
+        />
         <Text style={styles.title}>{product.name}</Text>
         <Text style={styles.price}>$ {product.price}</Text>     
 

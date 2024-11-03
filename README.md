@@ -763,4 +763,4 @@ Select Create policy.
 To manage these queries that are policy controlled, we will use
 React Query liabrary: [**React Query**](https://tanstack.com/query/latest) is a powerful state management and data fetching library that helps us query remote data. Besides helping us query data, manage the loading and error states, it also provides a caching mechanism for our local data. That will help us keep all the data in sync when things change in the application.
 
-5:50.03
+6:12:00S 

@@ -16,6 +16,7 @@ import { useCart } from '@/src/providers/CartProvider';
 import { PizzaSize } from '@/src/types';
 import { FontAwesome } from '@expo/vector-icons';
 import { useProduct } from '@/src/api/products';
+import RemoteImage from '@/src/components/RemoteImage';
 
 const sizes: PizzaSize[] = ['S', 'M', 'L', 'XL'];
 
@@ -78,7 +79,13 @@ const ProductDetailsScreen = () => {
       {/* <Stack.Screen options={{ title:'Details: '+ id}} /> */}
       <Stack.Screen options={{ title:product?.name}} />
 
-      <Image source={{uri: product?.image || defaultPizzaImage }} style={styles.image}/>
+      {/*<Image source={{uri: product?.image || defaultPizzaImage }} style={styles.image}/>*/}
+      <RemoteImage 
+        path={product?.image}  
+        fallback={defaultPizzaImage}
+        style={styles.image}
+        resizeMode='contain'
+      />
 
       <Text style={styles.title}>{product?.name}</Text>
 

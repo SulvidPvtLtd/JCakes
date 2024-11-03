@@ -19,7 +19,7 @@ export const useInsertOrderSubscription = () => {
         .subscribe();
         
         return () => {
-           ordersSubscription.unsubscribe();
+           ordersSubscription.unsubscribe(); // making sure we don't leak memory.
         };
     },[])
 }
@@ -41,6 +41,7 @@ export const useUpdateOrderSubscription = (id: number) => {
         (payload) => {
           // refetch(); instead of refetch you can just invalidate the query.
           queryClient.invalidateQueries({ queryKey: ['orders', id] });
+          
         }
       )
       .subscribe();

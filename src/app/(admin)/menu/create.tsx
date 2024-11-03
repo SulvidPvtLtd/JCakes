@@ -6,6 +6,10 @@ import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useInsertProduct, useProduct, useUpdateProduct, useDeleteProduct } from '@/src/api/products'; // Import the delete hook
+import * as FileSystem from 'expo-file-system';
+import { randomUUID } from 'expo-crypto';
+import { supabase } from '@/src/lib/supabase';
+import { decode } from 'base64-arraybuffer';
 
 const CreateProductScreen: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -67,6 +71,7 @@ const CreateProductScreen: React.FC = () => {
 
     setLoading(true);
     setButtonText('Updating...');
+    
 
     try {
       const productId = Array.isArray(id) ? Number(id[0]) : Number(id);
@@ -98,9 +103,11 @@ const CreateProductScreen: React.FC = () => {
     setLoading(true);
     setButtonText('Creating...');
 
+    const imagePath = await uploadImage();
+
     try {
       insertProduct(
-        { name, price: parseFloat(price), image },
+        { name, price: parseFloat(price), image: imagePath },
         {
           onSuccess: () => {
             setSuccessMessage('Product created successfully!');
@@ -161,6 +168,28 @@ const CreateProductScreen: React.FC = () => {
     );
   };
 
+  const uploadImage = async () => {
+    if (!image?.startsWith('file://')) {
+      return;
+    }
+  
+    const base64 = await FileSystem.readAsStringAsync(image, {
+      encoding: 'base64',
+    });
+    const filePath = `${randomUUID()}.png`;
+    const contentType = 'image/png';
+
+    const { data, error } = await supabase.storage
+      .from('products-images')
+      .upload(filePath, decode(base64), { contentType });
+  
+    console.log(error);
+
+    if (data) {
+      return data.path;
+    }
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -173,6 +202,8 @@ const CreateProductScreen: React.FC = () => {
       setImage(result.assets[0].uri);
     }
   };
+
+
 
   // Determine whether buttons should be disabled
   const isButtonDisabled = loading || deleting;
