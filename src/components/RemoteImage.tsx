@@ -1,5 +1,5 @@
 import { Image } from 'react-native';
-import React, { ComponentProps, useEffect, useMemo, useState } from 'react';
+import React, { ComponentProps, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 type RemoteImageProps = {
@@ -8,18 +8,24 @@ type RemoteImageProps = {
 } & Omit<ComponentProps<typeof Image>, 'source'>;
 
 const RemoteImage = ({ path, fallback, ...imageProps }: RemoteImageProps) => {
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!path) return;
-    (async () => {
-      setImage('');
+    if (!path) {
+      setImage(fallback);
+      return;
+    }
+
+    const fetchImage = async () => {
+      setImage(null); // Reset image on each new path load
       const { data, error } = await supabase.storage
         .from('products-images')
         .download(path);
 
       if (error) {
-        console.log(error);
+        console.error("Error downloading image:", error.message);
+        setImage(fallback); // Fallback in case of error
+        return;
       }
 
       if (data) {
@@ -29,11 +35,10 @@ const RemoteImage = ({ path, fallback, ...imageProps }: RemoteImageProps) => {
           setImage(fr.result as string);
         };
       }
-    })();
-  }, [path]);
+    };
 
-  if (!image) {
-  }
+    fetchImage();
+  }, [path, fallback]);
 
   return <Image source={{ uri: image || fallback }} {...imageProps} />;
 };

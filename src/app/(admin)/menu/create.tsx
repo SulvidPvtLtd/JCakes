@@ -107,7 +107,7 @@ const CreateProductScreen: React.FC = () => {
 
     try {
       insertProduct(
-        { name, price: parseFloat(price), image: imagePath },
+        { name, price: parseFloat(price), image: imagePath },  // new object.
         {
           onSuccess: () => {
             setSuccessMessage('Product created successfully!');
@@ -183,7 +183,7 @@ const CreateProductScreen: React.FC = () => {
       .from('products-images')
       .upload(filePath, decode(base64), { contentType });
   
-    console.log(error);
+    //console.log(error);
 
     if (data) {
       return data.path;
