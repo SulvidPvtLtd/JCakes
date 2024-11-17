@@ -38,8 +38,15 @@ const CreateProductScreen: React.FC = () => {
 
   // Navigation hooks and product-specific variables
   const { id: idString } = useLocalSearchParams();
-  const id = parseFloat(typeof idString === 'string' ? idString : idString?.[0]);
-  const isUpdating = !!id;
+  const id = parseFloat(
+    typeof idString === 'string'
+      ? idString
+      : Array.isArray(idString) && idString.length > 0
+      ? idString[0]
+      : "0" // Fallback to "0" if undefined or invalid
+  );
+  const isUpdating = id > 0; // Check if `id` is a valid number greater than 0
+  
   const router = useRouter();
 
   // API hooks to handle CRUD operations
@@ -80,7 +87,7 @@ const CreateProductScreen: React.FC = () => {
 
   // Handle image upload (local file to Supabase)
   const uploadImage = async (): Promise<string | null> => {
-    if ( !image?.startsWith('file://')) {
+    if (!image?.startsWith('file://')) {
       return image; // Return existing URL as is
     }
     try {
