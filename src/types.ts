@@ -13,14 +13,6 @@ export type InsertTables<T extends keyof Database['public']['Tables']> =
 export type Enums<T extends keyof Database['public']['Enums']> =
   Database['public']['Enums'][T];
 
-// The helper function above will give us the below types from supabase.
-// export type Product = {
-//   id: number;
-//   image: string | null;
-//   name: string;
-//   price: number;
-// };
-
 export type PizzaSize = 'S' | 'M' | 'L' | 'XL';
 
 export type CartItem = {

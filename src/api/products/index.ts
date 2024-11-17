@@ -18,6 +18,7 @@ export const useProductList = () => {
       return data;
     },
   });
+  
 };
 
 /*
@@ -57,6 +58,9 @@ export const useInsertProduct = () => {
           price: data.price,
         })
         .single();
+
+        console.log("Inserting/Updating Product Image URL:", data.image);
+
 
       if (error) {
         throw new Error(error.message);

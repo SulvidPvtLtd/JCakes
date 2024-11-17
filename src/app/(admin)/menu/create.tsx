@@ -1,37 +1,54 @@
-import { Alert, View, Text, TextInput, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import ButtonAdmin from '@/src/components/ButtonAdmin';
-import React, { useState, useCallback, useEffect } from 'react';
-import { defaultPizzaImage } from '@/src/components/ProductListItem';
-import Colors from '@/src/constants/Colors';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useInsertProduct, useProduct, useUpdateProduct, useDeleteProduct } from '@/src/api/products'; // Import the delete hook
+import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { randomUUID } from 'expo-crypto';
-import { supabase } from '@/src/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 
+import Colors from '@/src/constants/Colors';
+import ButtonAdmin from '@/src/components/ButtonAdmin';
+import { supabase } from '@/src/lib/supabase';
+import {
+  useInsertProduct,
+  useUpdateProduct,
+  useProduct,
+  useDeleteProduct,
+} from '@/src/api/products';
+import { defaultPizzaImage } from '@/src/components/ProductListItem';
+
+// Main Component
 const CreateProductScreen: React.FC = () => {
+  // Local state variables to manage form inputs and app behavior
   const [name, setName] = useState<string>('');
   const [price, setPrice] = useState<string>('');
-  const [error, setError] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [buttonText, setButtonText] = useState('Submit');
+  const [error, setError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [deleting, setDeleting] = useState(false); // New state for deleting
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
+  // Navigation hooks and product-specific variables
   const { id: idString } = useLocalSearchParams();
-  const id = parseFloat(typeof idString === 'string' ? idString : idString?.[0]); //the ?. operator is called the optional chaining operator. It allows you to safely access deeply nested properties of an object without causing an error if any part of the chain is null or undefined
-  const isUpdating = !!idString;                  //  !!idString is a shorthand way to convert idString to a boolean 
-
-  const { mutate: insertProduct } = useInsertProduct();
-  const { mutate: updateProduct } = useUpdateProduct();
-  const { data: updatingProduct } = useProduct(id);
-  const { mutate: deleteProduct } = useDeleteProduct(); // Initialize delete hook
-  
+  const id = parseFloat(typeof idString === 'string' ? idString : idString?.[0]);
+  const isUpdating = !!id;
   const router = useRouter();
 
+  // API hooks to handle CRUD operations
+  const { mutate: insertProduct } = useInsertProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
+  const { mutate: deleteProduct } = useDeleteProduct();
+  const { data: updatingProduct } = useProduct(id);
+
+  // Load product details for editing
   useEffect(() => {
     if (isUpdating && updatingProduct) {
       setName(updatingProduct.name);
@@ -40,271 +57,186 @@ const CreateProductScreen: React.FC = () => {
     }
   }, [isUpdating, updatingProduct]);
 
+  // Helper function to reset input fields
   const resetFields = useCallback(() => {
     setName('');
     setPrice('');
     setImage(null);
   }, []);
 
+  // Validate form inputs
   const validateInput = useCallback((): boolean => {
     if (!name.trim()) {
       setError('Name is required.');
       return false;
     }
-
-    if (!price.trim()) {
-      setError('Price is required.');
-      return false;
-    }
-
-    if (isNaN(parseFloat(price))) {
+    if (!price.trim() || isNaN(parseFloat(price))) {
       setError('Price must be a valid number.');
       return false;
     }
-
     setError('');
     return true;
   }, [name, price]);
 
-  const onUpdate = async () => {
-    if (!validateInput()) return;
-
-    setLoading(true);
-    setButtonText('Updating...');
-    
-
+  // Handle image upload (local file to Supabase)
+  const uploadImage = async (): Promise<string | null> => {
+    if ( !image || !image?.startsWith('file://')) {
+      return image; // Return existing URL as is
+    }
     try {
-      const productId = Array.isArray(id) ? Number(id[0]) : Number(id);
+      // Read image file as base64
+      const base64 = await FileSystem.readAsStringAsync(image, { encoding: 'base64' });
 
-      updateProduct(
-        { id: productId, name, price: parseFloat(price), image },
-        {
-          onSuccess: () => {
-            setSuccessMessage('Product updated successfully!');
-            resetFields();
-            setButtonText('Create');
-            Alert.alert('Success', 'Product updated successfully!', [
-              { text: 'OK', onPress: () => { router.back(); } }, // Use router.back() to go to the previous page
-            ]);
-          },
-          onError: (err: any) => setError(err.message),
-        }
-      );
+      // Upload to Supabase storage
+      const filePath = `${randomUUID()}.png`;
+      const { data, error } = await supabase.storage
+        .from('products-images')
+        .upload(filePath, decode(base64), { contentType: 'image/png' });
+
+      if (error) throw new Error(error.message);
+      return data?.path || null;
     } catch (err) {
-      setError('An unexpected error occurred.');
-    } finally {
-      setLoading(false);
+      console.error('Image upload error:', err);
+      return null;
     }
   };
 
-  const onCreate = async () => {
-    if (!validateInput()) return;
-
-    setLoading(true);
-    setButtonText('Creating...');
-
-    const imagePath = await uploadImage();
-
-    try {
-      insertProduct(
-        { name, price: parseFloat(price), image: imagePath },  // new object.
-        {
-          onSuccess: () => {
-            setSuccessMessage('Product created successfully!');
-            resetFields();
-            setButtonText('Create');
-            Alert.alert('Success', 'Product created successfully!', [
-              { text: 'OK', onPress: () => router.back() }, // Use router.back() to navigate back after creating
-            ]);
-          },
-          onError: (err: any) => setError(err.message),
-        }
-      );
-    } catch (err) {
-      setError('An unexpected error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSubmit = async () => {
-    if (isUpdating) {
-      await onUpdate();
-    } else {
-      await onCreate();
-    }
-  };
-
-  const handleDeleteProduct = () => {
-    if (!id) {
-      return; // No product ID to delete if it's a create action
-    }
-
-    Alert.alert(
-      'Delete Product',
-      'Are you sure you want to delete this product?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          onPress: () => {
-            setDeleting(true); // Set deleting state to true
-            deleteProduct(Number(id), {
-              onSuccess: () => {
-                setDeleting(false); // Reset deleting state
-                Alert.alert('Success', 'Product deleted successfully!', [
-                  { text: 'OK', onPress: () => router.replace('/(admin)') }, // Use router.back() to navigate back after deleting
-                ]);
-              },
-              onError: (err: any) => {
-                setDeleting(false); // Reset deleting state
-                setError(err.message);
-              },
-            });
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const uploadImage = async () => {
-    if (!image?.startsWith('file://')) {
-      return;
-    }
-  
-    const base64 = await FileSystem.readAsStringAsync(image, {
-      encoding: 'base64',
-    });
-    const filePath = `${randomUUID()}.png`;
-    const contentType = 'image/png';
-
-    const { data, error } = await supabase.storage
-      .from('products-images')
-      .upload(filePath, decode(base64), { contentType });
-  
-    //console.log(error);
-
-    if (data) {
-      return data.path;
-    }
-  };
-
+  // Handle image selection using ImagePicker
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
 
+  // Handle product creation
+  const onCreate = async () => {
+    if (!validateInput()) return;
+    setLoading(true);
 
+    try {
+      const imagePath = await uploadImage();
+      insertProduct(
+        { name, price: parseFloat(price), image: imagePath },
+        {
+          onSuccess: () => {
+            Alert.alert('Success', 'Product created successfully!');
+            resetFields();
+            router.back();
+          },
+          onError: (err: any) => setError(err.message),
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Determine whether buttons should be disabled
-  const isButtonDisabled = loading || deleting;
+  // Handle product update
+  const onUpdate = async () => {
+    if (!validateInput()) return;
+    setLoading(true);
 
+    try {
+      const imagePath = await uploadImage();
+      updateProduct(
+        { id: id!, name, price: parseFloat(price), image: imagePath },
+        {
+          onSuccess: () => {
+            Alert.alert('Success', 'Product updated successfully!');
+            router.back();
+          },
+          onError: (err: any) => setError(err.message),
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle product deletion
+  const handleDeleteProduct = () => {
+    if (!id) return;
+    Alert.alert('Delete Product', 'Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        onPress: () => {
+          setDeleting(true);
+          deleteProduct(id, {
+            onSuccess: () => {
+              Alert.alert('Success', 'Product deleted successfully!');
+              router.replace('/(admin)');
+            },
+            onError: (err: any) => setError(err.message),
+          });
+        },
+      },
+    ]);
+  };
+
+  // Determine the correct action for the form submission
+  const onSubmit = async () => (isUpdating ? await onUpdate() : await onCreate());
+
+  // Render UI
   return (
     <View style={styles.container}>
       <Stack.Screen
         options={{
           title: isUpdating ? 'Update Product' : 'Create Product',
-          headerTitleStyle: { color: Colors.light.adminBtn, fontSize: 20 },
+          headerTitleStyle: { fontSize: 20, color: Colors.light.tint },
         }}
       />
 
       <Image source={{ uri: image || defaultPizzaImage }} style={styles.image} />
-      <Text onPress={pickImage} style={styles.textButton}>Select image</Text>
+      <Text onPress={pickImage} style={styles.selectImageText}>
+        Select Image
+      </Text>
 
       <Text style={styles.label}>Name</Text>
-      <TextInput
-        value={name}
-        onChangeText={setName}
-        placeholder="Name"
-        style={styles.input}
-      />
+      <TextInput value={name} onChangeText={setName} style={styles.input} placeholder="Product Name" />
 
       <Text style={styles.label}>Price (R)</Text>
       <TextInput
         value={price}
         onChangeText={setPrice}
-        placeholder="99.99"
         style={styles.input}
+        placeholder="e.g., 99.99"
         keyboardType="numeric"
       />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
+      {error && <Text style={styles.error}>{error}</Text>}
 
-      <ButtonAdmin 
-        onPress={onSubmit} 
-        text={loading ? 'Processing...' : buttonText} 
-        disabled={isButtonDisabled} // Disable if loading or deleting
-      />
-      
-      {/* Add delete button for update product page */}
+      <ButtonAdmin onPress={onSubmit} text={loading ? 'Processing...' : isUpdating ? 'Update' : 'Create'} />
+
       {isUpdating && (
-        <ButtonAdmin 
-          onPress={handleDeleteProduct} 
-          text="Delete Product" 
-          disabled={isButtonDisabled}  // Disable if loading or deleting
-          style={{ backgroundColor: 'red' }} // Optional styling for visibility
+        <ButtonAdmin
+          onPress={handleDeleteProduct}
+          text="Delete Product"
+          style={{ backgroundColor: 'red' }}
+          disabled={deleting}
         />
       )}
 
-      {/* Show Activity Indicator while deleting */}
-      {deleting && (
-        <ActivityIndicator size="large" color={Colors.light.tint} style={styles.activityIndicator} />
-      )}
+      {deleting && <ActivityIndicator style={styles.loader} />}
     </View>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 10,
-    backgroundColor: 'gainsboro',
-  },
-  input: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 5,
-    marginBottom: 20,
-  },
-  label: {
-    color: 'black',
-    fontSize: 16,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-  success: {
-    color: 'green',
-    marginBottom: 10,
-  },
-  image: {
-    width: '50%',
-    aspectRatio: 1,
-    alignSelf: 'center',
-  },
-  textButton: {
-    alignSelf: 'center',
-    fontWeight: 'bold',
-    color: Colors.light.tint,
-    marginVertical: 10,
-  },
-  activityIndicator: {
-    marginTop: 20, // Add some space above the ActivityIndicator
-    alignSelf: 'center', // Center the ActivityIndicator
-  },
+  container: { flex: 1, padding: 10, backgroundColor: 'white' },
+  input: { backgroundColor: 'lightgray', padding: 10, marginVertical: 10 },
+  label: { fontWeight: 'bold', marginTop: 10 },
+  error: { color: 'red', marginTop: 5 },
+  image: { width: 200, height: 200, alignSelf: 'center', marginVertical: 10 },
+  selectImageText: { color: Colors.light.tint, alignSelf: 'center', marginVertical: 10 },
+  loader: { marginTop: 10, alignSelf: 'center' },
 });
 
 export default CreateProductScreen;

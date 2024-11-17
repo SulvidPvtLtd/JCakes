@@ -3,7 +3,7 @@ const products = [
     id: 1,
     name: 'Ultimate Pepperoni',
     image:
-      'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/peperoni.png', //create own url.
+      'https://uonumbnwildgsugndtmk.supabase.co/storage/v1/object/sign/products-images/defaultImages/default.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJwcm9kdWN0cy1pbWFnZXMvZGVmYXVsdEltYWdlcy9kZWZhdWx0LnBuZyIsImlhdCI6MTczMTYxMTQ1NywiZXhwIjoyNjc3NjkxNDU3fQ.VWHIblJ6KYJQs8dPLv8kGMAnfKCsMN81FuNdz2QtWZE&t=2024-11-14T19%3A10%3A56.094Z', //create own url.
     price: 12.99,
   },
   {

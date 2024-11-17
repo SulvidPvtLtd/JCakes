@@ -54,7 +54,7 @@ const ProductDetailsScreen = () => {
       {/* <Stack.Screen options={{ title:'Details: '+ id}} /> */}
       <Stack.Screen options={{ title:product?.name}} />
       <RemoteImage 
-        path={product?.image}
+        path={product?.image}  
         fallback={defaultPizzaImage}
         style={styles.image}
         resizeMode='contain'

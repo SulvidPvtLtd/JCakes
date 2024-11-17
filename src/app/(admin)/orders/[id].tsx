@@ -28,7 +28,7 @@ const OrderDetailScreen = () => {
     return <Text>Failed to fetch order</Text>;
   }
 
-  console.log(order);
+  //console.log(order);
 
   return (
     <View style={styles.container}>

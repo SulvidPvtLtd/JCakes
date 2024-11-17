@@ -20,8 +20,8 @@ const OrderItemListItem = ({ item }: OrderItemListItemProps) => {
       /> */}
 
     <RemoteImage
-      fallback={defaultPizzaImage}
       path={item.products.image}
+      fallback={defaultPizzaImage}     
       style={styles.image}
       resizeMode="contain"
     />

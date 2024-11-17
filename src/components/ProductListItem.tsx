@@ -4,7 +4,7 @@ import { Tables } from '../types';
 import { Link, useSegments } from 'expo-router';
 import RemoteImage from './RemoteImage';
 
-export const defaultPizzaImage = 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/default.png';
+export const defaultPizzaImage = 'https://uonumbnwildgsugndtmk.supabase.co/storage/v1/object/sign/products-images/defaultImages/default.png';
 
 type Product = Tables<'products'>;
 

@@ -15,7 +15,7 @@ const SignUpScreen = () => {
   async function checkAccountExists() {
     setLoading(true);
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('email')
       .eq('email', email)
       .single();

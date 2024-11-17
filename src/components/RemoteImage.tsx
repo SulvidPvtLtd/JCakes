@@ -35,10 +35,18 @@ const RemoteImage = ({ path, fallback, ...imageProps }: RemoteImageProps) => {
           setImage(fr.result as string);
         };
       }
+
+      //console.log("Supabase response:", { data, error });
     };
 
     fetchImage();
+
+    // console.log("Image path:", path);
+    // console.log("Fallback:", fallback);
+   
   }, [path, fallback]);
+
+       
 
   return <Image source={{ uri: image || fallback }} {...imageProps} />;
 };
