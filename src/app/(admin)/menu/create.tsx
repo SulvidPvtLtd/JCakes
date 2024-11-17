@@ -80,7 +80,7 @@ const CreateProductScreen: React.FC = () => {
 
   // Handle image upload (local file to Supabase)
   const uploadImage = async (): Promise<string | null> => {
-    if ( !image || !image?.startsWith('file://')) {
+    if ( !image?.startsWith('file://')) {
       return image; // Return existing URL as is
     }
     try {

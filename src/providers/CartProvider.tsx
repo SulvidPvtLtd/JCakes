@@ -90,6 +90,7 @@ const CartProvider = ({ children }: PropsWithChildren)=>{
     }
 
     const saveOrderItems = (order: Tables<'orders'>) => {
+
         const orderItems = items.map((cartItem) => ({
           order_id: order.id,
           product_id: cartItem.product_id,
@@ -97,15 +98,19 @@ const CartProvider = ({ children }: PropsWithChildren)=>{
           size: cartItem.size,
         }));
     
-        insertOrderItems(orderItems, {
-          onSuccess() {
-            //console.log(order);
-            clearCart();
-            router.push(`/(user)/orders/${order.id}`);
-          },
-        });
+        insertOrderItems(
+            orderItems, 
+            { onSuccess()
+                 {
+                    //console.log(order);
+                    clearCart();
+                    router.push(`/(user)/orders/${order.id}`);
+                },
+            }
+        );
+        //console.log(orderItems);
       };
-
+      
     return(
         <CartContext.Provider value={{items, addItem, updateQuantity, total, checkout }}>
             {children}
