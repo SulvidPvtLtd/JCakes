@@ -1,119 +1,226 @@
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import React, { useState } from 'react';
-import Button from '../../components/Button';
-import Colors from '../../constants/Colors';
-import { Link, Stack, useRouter } from 'expo-router';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { supabase } from '@/src/lib/supabase';
+import * as ImagePicker from 'expo-image-picker';
+
+const screenWidth = Dimensions.get('window').width;
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();  // Use router for navigation
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  async function checkAccountExists() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('email', email)
-      .single();
+  const handleSignUp = async () => {
+    try {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      if (signUpError) {
+        throw signUpError;
+      }
 
-    if (data) {
-      return true; // Account exists
-    } else if (error && error.code !== 'PGRST116') { // Handle specific error codes if necessary
-      Alert.alert('Error checking account', error.message);
-      return false;
+      const user = signUpData.user;
+      if (user) {
+        const updates: any = {
+          id: user.id, // Ensure user.id is a string (typically UUID)
+          full_name: fullName,
+          username,
+          mobile_number: mobileNumber ? parseInt(mobileNumber, 10) : null, // Convert mobile number to number
+          avatar_url: avatarUrl,
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert(updates);
+
+        if (profileError) {
+          throw profileError;
+        }
+
+        Alert.alert('Registration Successful', 'You have successfully signed up!');
+        setEmail('');
+        setPassword('');
+        setFullName('');
+        setUsername('');
+        setMobileNumber('');
+        setAvatarUrl(null);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Something went wrong');
     }
+  };
 
-    return false; // Account doesn't exist
-  }
+  const uploadAvatar = async () => {
+    try {
+      setUploading(true);
 
-  async function signUpWithEmail() {
-    const accountExists = await checkAccountExists();
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
 
-    if (accountExists) {
-      Alert.alert('Account already exists. Redirecting to sign-in...');
-      router.push('/sign-in');  // Navigate to sign-in
-      return;
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        console.log('User cancelled image picker.');
+        return;
+      }
+
+      const image = result.assets[0];
+      const fileExt = image.uri.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const response = await fetch(image.uri);
+      const blob = await response.blob();
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, blob, {
+          contentType: image.type || 'image/jpeg',
+        });
+
+      if (uploadError) throw uploadError;
+
+      const publicUrlResponse = supabase.storage.from('avatars').getPublicUrl(data.path);
+
+      if (!publicUrlResponse.data) {
+        throw new Error('Failed to get public URL for the avatar.');
+      }
+
+      setAvatarUrl(publicUrlResponse.data.publicUrl);
+
+      Alert.alert('Avatar uploaded successfully!');
+    } catch (error: any) {
+      Alert.alert('Error uploading avatar', error.message);
+    } finally {
+      setUploading(false);
     }
-
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      Alert.alert('Account created successfully!');
-      router.push('/sign-in');  // Navigate to sign-in after successful sign-up
-    }
-
-    setLoading(false);
-  }
-
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(!isPasswordVisible);
   };
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: 'Sign up' }} />
+      {/* Hiding the Sign Up header */}
+      {/* <Text style={styles.title}>Sign Up</Text> */}
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email address"
-        style={styles.input}
+      {avatarUrl ? (
+        <Image
+          source={{ uri: avatarUrl }}
+          style={[styles.avatar, { width: screenWidth * 0.4, height: screenWidth * 0.4 }]}
+        />
+      ) : (
+        <View
+          style={[
+            styles.avatarPlaceholder,
+            { width: screenWidth * 0.4, height: screenWidth * 0.4 },
+          ]}
+        />
+      )}
+
+      <Button
+        title={uploading ? 'Uploading...' : 'Upload Avatar'}
+        onPress={uploadAvatar}
+        disabled={uploading}
+        color="#007AFF"
       />
 
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        style={styles.input}
-        secureTextEntry={!isPasswordVisible}
-      />
+      {/* Adding space between the upload button and the first input field */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Mobile Number"
+          value={mobileNumber}
+          onChangeText={setMobileNumber}
+          keyboardType="phone-pad"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
 
-      <Button onPress={signUpWithEmail} disabled={loading} text={loading ? "Creating account..." : "Create account"} />
-      <Link href="/sign-in" style={styles.textButton}>
-        Sign in
-      </Link>
+      <View style={styles.buttonContainer}>
+        <Button title="Sign Up" onPress={handleSignUp} color="#007AFF" />
+      </View>
     </View>
   );
 };
 
+export default SignUpScreen;
+
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    justifyContent: 'center',
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f9f9f9',
   },
-  label: {
-    color: 'gray',
+  inputContainer: {
+    marginTop: 20, // Add some space between the upload button and the inputs
+    width: '100%',
   },
   input: {
+    width: '100%',
+    height: 50,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: 'gray',
-    padding: 10,
-    marginTop: 5,
-    marginBottom: 20,
-    backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    backgroundColor: '#fff',
   },
-  textButton: {
-    alignSelf: 'center',
-    fontWeight: 'bold',
-    color: Colors.light.tint,
-    marginVertical: 10,
+  buttonContainer: {
+    width: '100%',
+    marginTop: 10,
+  },
+  avatar: {
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    resizeMode: 'cover',
+  },
+  avatarPlaceholder: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    marginBottom: 20,
   },
 });
-
-export default SignUpScreen;
