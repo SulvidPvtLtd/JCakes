@@ -763,4 +763,105 @@ Select Create policy.
 To manage these queries that are policy controlled, we will use
 React Query liabrary: [**React Query**](https://tanstack.com/query/latest) is a powerful state management and data fetching library that helps us query remote data. Besides helping us query data, manage the loading and error states, it also provides a caching mechanism for our local data. That will help us keep all the data in sync when things change in the application.
 
-6:12:0S 
+# Local development with schema migrations
+
+We suggest you work locally and deploy your changes to a linked project on the Supabase Platform.
+Develop locally using the CLI to run a local Supabase stack.
+You can use the integrated Studio Dashboard to make changes, then capture your changes in schema migration files, which can be saved in version control.
+
+Alternatively, if you're comfortable with migration files and SQL,
+you can write your own migrations and push them to the local database for testing before sharing your changes.
+
+    # Database migrations
+
+    Database changes are managed through "migrations."
+    Database migrations are a common way of tracking changes to your database over time.
+
+This is a recommended way to pull your superbase instance locally before running it into development.
+This is meant to give you enough room to test your instance locally untill you are sure its' free from bugs and is running as per expectations.
+Only after this, push it to your cloud instance on Supabase.
+
+Supabase CLI
+Develop locally, deploy to the Supabase Platform, and set up CI/CD workflows
+
+The Supabase CLI enables you to run the entire Supabase stack locally, on your machine or in a CI environment. With just two commands, you can set up and start a new local project:
+
+    1. supabase init to create a new local project
+    2. supabase start to launch the Supabase services
+
+Installing the Supabase CLI
+
+1. scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+2. scoop install supabase
+
+When a new version is released, you can update the CLI using the same methods. 3. scoop update supabase
+
+    `If you have any Supabase containers running locally, stop them and delete their
+    data volumes before proceeding with the upgrade.
+    This ensures that Supabase managed services can apply new migrations on a clean
+    state of the local database.`
+
+Backup and stop running containers
+
+Remember to save any local schema and data changes before stopping because the --no-backup flag will delete them.
+
+    1.` supabase db diff my_schema`
+    2. `supabase db dump --local --data-only > supabase/seed.sql`
+    3. `supabase stop --no-backup`
+
+Running Supabase locally
+
+The Supabase CLI uses Docker containers to manage the local development stack.
+
+Inside the folder where you want to create your project, run:
+
+    1. `supabase init`
+        This will create a new supabase folder. It's safe to commit this folder to
+        your version control system.
+
+    Now, to start the Supabase stack, run:
+    2. `supabase start`
+
+    This takes time on your first run because the CLI needs to download the Docker
+    images to your local machine. The CLI includes the entire Supabase toolset, and a
+    few additional images that are useful for local development (like a local SMTP
+    server and a database diff tool).
+
+# For this project:
+
+Run the following commands - remember to use `npx` specific to the project as we are not installing gloabally.
+
+1. npx supabase login //this links your project to supabase
+2. npx supabase init // initialise supabase in our project
+   It will request:
+
+- ` Generate VS Code settings for Deno? [y/N]`
+  You should respond with a no: N
+
+  A new folder called supabase will be created in your project.
+
+# Next step is to link our local supabase with the remote one
+
+1. npx supabase link --project-ref // You will find the project reference under supabase
+
+   > > Project Settings >>Project ID
+
+2. npx supabase db pull //Pull all changes in currently remote supabase instance (all db tables)
+   to the local development machine.
+3. npx supabase db pull --schema auth,storage
+4. npx supabse start
+
+Why Are These Schemas Excluded by Default?
+Prevent Conflicts: The auth and storage schemas are tightly coupled with Supabase's internal services. Modifying them directly might cause unexpected behavior or conflicts.
+Focus on User-Defined Schemas: By default, Supabase CLI assumes you're primarily interested in managing your custom schemas.
+
+When Should You Include These Schemas?
+If You Need to Reference Them: If your application interacts heavily with auth or storage and you need them in your local schema for development or testing.
+For Documentation Purposes: To understand the structure of these schemas better.
+When Extending Functionality: If you're adding custom fields or foreign keys related to auth or storage schemas, including them may be useful.
+
+In my case, my project relies heavily on the auth and storage schemas (e.g., for group policies or interactions with the products_images table), pulling these schemas is a good idea. This ensures that your local schema files are complete and reflect the structure of your database, including the schemas that your project depends on.
+or `npx supabase db pull --all-schemas`
+
+
+In the newly created folder `supabase` create a dot env file.
