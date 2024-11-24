@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 15,
     paddingLeft: 10,
-    fontSize: 16,
+    fontSize: 14,
     width: '100%', // Make inputs full width
   },
   avatarContainer: {
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    marginTop:10, // Space from top
+    marginTop:0.5, // Space from top
   },
   avatar: {
     width: 110,
@@ -274,13 +274,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 15,
-    marginBottom: 15,
-    width: '100%',
+    marginBottom: 10,
+    width: '55%',
+    height:38,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   signOutButton: {
