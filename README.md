@@ -863,5 +863,6 @@ When Extending Functionality: If you're adding custom fields or foreign keys rel
 In my case, my project relies heavily on the auth and storage schemas (e.g., for group policies or interactions with the products_images table), pulling these schemas is a good idea. This ensures that your local schema files are complete and reflect the structure of your database, including the schemas that your project depends on.
 or `npx supabase db pull --all-schemas`
 
-
 In the newly created folder `supabase` create a dot env file.
+
+6:28:24
