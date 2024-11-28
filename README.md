@@ -46,6 +46,11 @@ src/components/: Reusable components like buttons and theme-related helpers.
 src/constants/: Stores configuration files such as color schemes for consistent app theming.
 src/providers/: Manages the app's global state through context, like the CartProvider.
 
+# schema
+
+![cls
+]({B85FABEF-BA67-4F3E-81D2-2C3C67E4B592}.png)
+
 # Topics Covered in this project:
 
     1	 This is a full-stack food ordering app built using React Native and Supabase.

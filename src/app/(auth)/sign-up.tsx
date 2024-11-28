@@ -19,7 +19,7 @@ const SignUpScreen = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [mobile, setMobileNumber] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -40,7 +40,7 @@ const SignUpScreen = () => {
           id: user.id, // Ensure user.id is a string (typically UUID)
           full_name: fullName,
           username,
-          mobile_number: mobileNumber ? parseInt(mobileNumber, 10) : null, // Convert mobile number to number
+          mobile: mobile? parseInt(mobile, 10) : null, // Convert mobile number to number
           avatar_url: avatarUrl,
         };
 
@@ -65,76 +65,53 @@ const SignUpScreen = () => {
     }
   };
 
-  const uploadAvatar = async () => {
-    try {
-      setUploading(true);
+  // const uploadAvatar = async () => {
+  //   try {
+  //     setUploading(true);
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-      });
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsEditing: true,
+  //       quality: 1,
+  //     });
 
-      if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log('User cancelled image picker.');
-        return;
-      }
+  //     if (result.canceled || !result.assets || result.assets.length === 0) {
+  //       console.log('User cancelled image picker.');
+  //       return;
+  //     }
 
-      const image = result.assets[0];
-      const fileExt = image.uri.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const response = await fetch(image.uri);
-      const blob = await response.blob();
+  //     const image = result.assets[0];
+  //     const fileExt = image.uri.split('.').pop();
+  //     const fileName = `${Date.now()}.${fileExt}`;
+  //     const response = await fetch(image.uri);
+  //     const blob = await response.blob();
 
-      const { data, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, blob, {
-          contentType: image.type || 'image/jpeg',
-        });
+  //     const { data, error: uploadError } = await supabase.storage
+  //       .from('avatars')
+  //       .upload(fileName, blob, {
+  //         contentType: image.type || 'image/jpeg',
+  //       });
 
-      if (uploadError) throw uploadError;
+  //     if (uploadError) throw uploadError;
 
-      const publicUrlResponse = supabase.storage.from('avatars').getPublicUrl(data.path);
+  //     const publicUrlResponse = supabase.storage.from('avatars').getPublicUrl(data.path);
 
-      if (!publicUrlResponse.data) {
-        throw new Error('Failed to get public URL for the avatar.');
-      }
+  //     if (!publicUrlResponse.data) {
+  //       throw new Error('Failed to get public URL for the avatar.');
+  //     }
 
-      setAvatarUrl(publicUrlResponse.data.publicUrl);
+  //     setAvatarUrl(publicUrlResponse.data.publicUrl);
 
-      Alert.alert('Avatar uploaded successfully!');
-    } catch (error: any) {
-      Alert.alert('Error uploading avatar', error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
+  //     Alert.alert('Avatar uploaded successfully!');
+  //   } catch (error: any) {
+  //     Alert.alert('Error uploading avatar', error.message);
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
-      {/* Hiding the Sign Up header */}
-      {/* <Text style={styles.title}>Sign Up</Text> */}
-
-      {avatarUrl ? (
-        <Image
-          source={{ uri: avatarUrl }}
-          style={[styles.avatar, { width: screenWidth * 0.4, height: screenWidth * 0.4 }]}
-        />
-      ) : (
-        <View
-          style={[
-            styles.avatarPlaceholder,
-            { width: screenWidth * 0.4, height: screenWidth * 0.4 },
-          ]}
-        />
-      )}
-
-      <Button
-        title={uploading ? 'Uploading...' : 'Upload Avatar'}
-        onPress={uploadAvatar}
-        disabled={uploading}
-        color="#007AFF"
-      />
 
       {/* Adding space between the upload button and the first input field */}
       <View style={styles.inputContainer}>
@@ -153,7 +130,7 @@ const SignUpScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Mobile Number"
-          value={mobileNumber}
+          value={mobile}
           onChangeText={setMobileNumber}
           keyboardType="phone-pad"
         />

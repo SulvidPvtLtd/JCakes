@@ -7,6 +7,7 @@ import 'react-native-url-polyfill/auto';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/src/database.types';
+//import 'dotenv/config';
 
 
 const ExpoSecureStoreAdapter = {
