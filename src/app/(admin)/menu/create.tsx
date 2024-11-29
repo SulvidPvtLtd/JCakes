@@ -156,6 +156,7 @@ const CreateProductScreen: React.FC = () => {
         {
           onSuccess: () => {
             Alert.alert('Success', 'Product updated successfully!');
+            resetFields();
             router.back();
           },
           onError: (err: any) => setError(err.message),
