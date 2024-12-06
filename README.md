@@ -768,6 +768,84 @@ Select Create policy.
 To manage these queries that are policy controlled, we will use
 React Query liabrary: [**React Query**](https://tanstack.com/query/latest) is a powerful state management and data fetching library that helps us query remote data. Besides helping us query data, manage the loading and error states, it also provides a caching mechanism for our local data. That will help us keep all the data in sync when things change in the application.
 
+
+# https://www.freecodecamp.org/news/how-to-dockerize-a-react-application/
+
+How to Write a Dockerfile
+- Used for building an image of your application.
+- specify instructions for the same in a Dockerfile. 
+- The instructions from this file will be executed one after the other.
+- A Docker image consists of different layers stacked on top of each other.
+- Each instruction in the Dockerfile adds a new layer on top of the existing ones.
+- Each layer in the image is stored as a SHA-256 hash.
+1. Pull the base image from a remote repository (in this case, the Docker Hub), the below command will define the starting point for the image layers.
+ `FROM node:22.11.0-bullseye` the tag ":22.11.0-bullseye" is the version of the image
+2. Create a directory in which the commands for building the image will be executed from.
+    `WORKDIR /jcakes/`
+3. Copy the files we need into the working directory.
+- We only need the src folders (where your code resides), and the package.json file to run the application
+`COPY public/ /jcakes/public`
+`COPY src/ /jcakes/src`
+`COPY package.json /jcakes/`
+
+4. Add The RUN instruction that will execute any command by adding a new layer on top of the current ones, thus modifying the image.
+`RUN npm install`
+5. Define the command that will be executed when starting a container from the image.
+There can only be one CMD instruction in the Dockerfile.
+Since npm start is the command used for starting a React app, we'll specify the same for running the container.
+`CMD ["npm", "start"]`
+
+# How to Build the Image
+Now that we have written the Dockerfile, it's time to build the image. 
+1. Open your terminal (or cmd in Windows) and execute the following command.
+    Run this command inside the root directory of your project, in this case inside \Desktop\eComm\JCakes>
+
+`docker image build -t <image_name>:<tag> <path>`
+i.e,
+`docker build -t sulvid/jcakes:v0.0.1.RELEASE sulvid/jcakes .`
+
+2. Now, `run docker images` to see a list of images in your system.
+
+3. Run your specific container exposed at a certain port.
+
+`docker run -d -p 8081:8081 --name jcakes sulvid/jcakes:v0.0.2.RELEASE `
+
+# How to Push the Image to Docker Hub
+1. Docker Hub is a repository (or registry) where you can push your image as well as access other open source images.
+2. Create a Docker Hub account.
+3. go to repositories and click on Create repository.
+4. Specify a repository name and mark it public or private. 
+In the community edition, you are only allowed to have 1 private repository.
+5. Push your image to this respository.
+First, you need to login using your credentials.
+`docker login`
+6. After this, tag the image with your username.
+`docker image tag react-example-image <username>/react-example-image`
+
+`docker image tag jcakes:0.0.1 sulvid/jcakes:0.0.1`
+
+7. If You can create an upgraded version of the same image, tag it with the new version name and then, push it.
+run this comman in the root directory of the project
+
+`docker image build -t jcakes:v0.0.2 .`
+
+`docker image tag sulvid/jcakes:v0.0.2 sulvid/jcakes:v0.0.2`
+
+`docker push sulvid/jcakes:v0.0.2`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Local development with schema migrations
 
 We suggest you work locally and deploy your changes to a linked project on the Supabase Platform.
@@ -871,3 +949,42 @@ or `npx supabase db pull --all-schemas`
 In the newly created folder `supabase` create a dot env file.
 
 6:28:24
+
+# 1. Create a Docker Image for Your React Native Project
+
+1. Ensure Docker Desktop is installed and running on your machine.
+2. Add a Dockerfile to Your Project
+   In the root of your React Native project, create a file named
+   Dockerfile:
+
+3. In your terminal, navigate to your project's root directory and build the image: ` docker build -t react-native-app .`
+
+4. Set Up Supabase as a Docker Container.
+   Pull the Supabase Image>>Search for the official Supabase image in Docker Desktop GUI or use the CLI to pull it:
+   `docker pull supabase/postgres`
+5. Run the Supabase Container
+   -Run the Supabase container, specifying environment variables for your database:
+   `docker run --name supabase-db -e POSTGRES_PASSWORD=yourpassword -e POSTGRES_USER=youruser -e POSTGRES_DB=yourdb -p 5432:5432 -d supabase/postgres`
+
+Alternatively, you can create and configure the container using Docker Desktop GUI:
+
+1. Go to Containers/Apps and click Add Container.
+2. Select the supabase/postgres image.
+3. Configure the environment variables (POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB) in the Environment tab.
+4. Set the port mapping (5432:5432) in the Port tab.
+5. Start the container.
+
+Connect Your React Native Project to the Supabase Container
+
+6. Update Environment Variables in Your Project: Modify your React Native .env file to point to the Supabase container running locally. Use localhost as the host:
+
+`SUPABASE_URL=http://localhost:5432`
+`SUPABASE_ANON_KEY=your-anon-key`
+`SUPABASE_SERVICE_KEY=your-service-key`
+
+7. Start the Project in the Docker Container: Use the built Docker image to run the React Native development server:
+   `docker run -p 8081:8081 -v $(pwd):/app react-native-app`
+
+8. Test the Setup
+   Ensure both the Supabase and React Native containers are running in Docker Desktop.
+   Use the React Native app to test the connection to the Supabase backend.
