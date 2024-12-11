@@ -24,7 +24,7 @@ const ExpoSecureStoreAdapter = {
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 // This is safe to use because its dependent on wether the user is authenticated or not.
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON || "";
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
