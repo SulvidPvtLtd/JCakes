@@ -39,3 +39,16 @@ EXPOSE 8081
 # `npm start` is a shorthand for the script defined in `package.json` under the "start" key.
 CMD ["npm", "start"]
 
+
+FROM node:22.11.0-bullseye AS builder
+ENV NODE_ENV production
+WORKDIR /jcakes
+COPY src/ /jcakes/src
+COPY package.json /jcakes/
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+RUN npm build
+
+
+FROM nginx:1.21.0-
