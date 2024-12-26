@@ -1020,4 +1020,30 @@ if the above works fine, deploy the function
 
 `npx supabase functions deploy payment-sheet`
 
-7:00:11
+Stripe has great support for React Native. It has a lot of pre-build UI components that we can easily use out-of-the box.
+
+We will use their Payment Sheet to collect payments.
+
+The Payment Sheet expects a PaymentIntent, that we created on the backend in the clprevious step.
+
+# Setup stripe
+
+https://docs.expo.dev/versions/latest/sdk/stripe/
+`npx expo install @stripe/stripe-react-native`
+
+Inside src/app/\_layout.tsx
+
+`import {StripeProvider} from '@stripe/stripe-react-native'`
+
+    <StripeProvider
+        publishableKey={
+            process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+        }
+    >
+
+        //make sure the Stack is a child of stripe provider.
+
+    </StripeProvider>
+
+Once this has been implemented, you can now start using it in the app.
+7:04
